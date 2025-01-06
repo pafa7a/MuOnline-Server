@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+message HelloResponse {
+  string message = 1;
+}
+
+message ServerInfo {
+  string name = 1;
+  string ip = 2;
+  int32 port = 3;
+}
+
+message ServerListResponse {
+  repeated ServerInfo servers = 1;
+}
+
+message ServerListRequest {}
