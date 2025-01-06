@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option csharp_namespace = "ConnectProto";
+
 message Wrapper {
   string type = 1;
   bytes payload = 2;
