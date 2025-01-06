@@ -7,6 +7,6 @@ export default {
   handle: (ws, payload) => {
     console.log(`Handled HelloResponse:`, decodeHelloResponse(payload));
     console.log(`ConnectedClients: `, connectedClients.size)
-    ws.send(encodeWrapper({type: 'asd', payload: 'dsa'}))
+    ws.send(encodeWrapper({type: 'asd', payload: 'dsa23232'}))
   },
 };
