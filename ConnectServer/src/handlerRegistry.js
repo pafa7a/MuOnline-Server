@@ -9,7 +9,7 @@ const handlersDir = path.join(__dirname, "handlers");
 fs.readdirSync(handlersDir).forEach((file) => {
   if (file.endsWith(".js")) {
     const handler = require(path.join(handlersDir, file)).default;
-    handlers[handler.messageType] = handler;
+    handlers[handler.type] = handler;
   }
 });
 

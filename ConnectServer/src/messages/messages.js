@@ -1,3 +1,59 @@
+export function encodeWrapper(message) {
+  let bb = popByteBuffer();
+  _encodeWrapper(message, bb);
+  return toUint8Array(bb);
+}
+
+function _encodeWrapper(message, bb) {
+  // optional string type = 1;
+  let $type = message.type;
+  if ($type !== undefined) {
+    writeVarint32(bb, 10);
+    writeString(bb, $type);
+  }
+
+  // optional bytes payload = 2;
+  let $payload = message.payload;
+  if ($payload !== undefined) {
+    writeVarint32(bb, 18);
+    writeVarint32(bb, $payload.length), writeBytes(bb, $payload);
+  }
+}
+
+export function decodeWrapper(binary) {
+  return _decodeWrapper(wrapByteBuffer(binary));
+}
+
+function _decodeWrapper(bb) {
+  let message = {};
+
+  end_of_message: while (!isAtEnd(bb)) {
+    let tag = readVarint32(bb);
+
+    switch (tag >>> 3) {
+      case 0:
+        break end_of_message;
+
+      // optional string type = 1;
+      case 1: {
+        message.type = readString(bb, readVarint32(bb));
+        break;
+      }
+
+      // optional bytes payload = 2;
+      case 2: {
+        message.payload = readBytes(bb, readVarint32(bb));
+        break;
+      }
+
+      default:
+        skipUnknownField(bb, tag & 7);
+    }
+  }
+
+  return message;
+}
+
 export function encodeHelloResponse(message) {
   let bb = popByteBuffer();
   _encodeHelloResponse(message, bb);
@@ -32,6 +88,37 @@ function _decodeHelloResponse(bb) {
         message.message = readString(bb, readVarint32(bb));
         break;
       }
+
+      default:
+        skipUnknownField(bb, tag & 7);
+    }
+  }
+
+  return message;
+}
+
+export function encodeServerListRequest(message) {
+  let bb = popByteBuffer();
+  _encodeServerListRequest(message, bb);
+  return toUint8Array(bb);
+}
+
+function _encodeServerListRequest(message, bb) {
+}
+
+export function decodeServerListRequest(binary) {
+  return _decodeServerListRequest(wrapByteBuffer(binary));
+}
+
+function _decodeServerListRequest(bb) {
+  let message = {};
+
+  end_of_message: while (!isAtEnd(bb)) {
+    let tag = readVarint32(bb);
+
+    switch (tag >>> 3) {
+      case 0:
+        break end_of_message;
 
       default:
         skipUnknownField(bb, tag & 7);
@@ -153,37 +240,6 @@ function _decodeServerListResponse(bb) {
         bb.limit = limit;
         break;
       }
-
-      default:
-        skipUnknownField(bb, tag & 7);
-    }
-  }
-
-  return message;
-}
-
-export function encodeServerListRequest(message) {
-  let bb = popByteBuffer();
-  _encodeServerListRequest(message, bb);
-  return toUint8Array(bb);
-}
-
-function _encodeServerListRequest(message, bb) {
-}
-
-export function decodeServerListRequest(binary) {
-  return _decodeServerListRequest(wrapByteBuffer(binary));
-}
-
-function _decodeServerListRequest(bb) {
-  let message = {};
-
-  end_of_message: while (!isAtEnd(bb)) {
-    let tag = readVarint32(bb);
-
-    switch (tag >>> 3) {
-      case 0:
-        break end_of_message;
 
       default:
         skipUnknownField(bb, tag & 7);

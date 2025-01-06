@@ -1,12 +1,12 @@
-import { encodeHelloResponse } from "@messages/messages";
+import { decodeHelloResponse } from "@messages/messages";
+import { connectedClients } from "@server/server";
+import { encodeWrapper } from "@messages/messages"; // Import wrapper functions
 
 export default {
-  messageType: "HelloResponse",
-  handle: (client, message) => {
-    console.log("Handling HelloResponse:", message);
-
-    const response = { message: "Hello, client!" };
-    const encoded = encodeHelloResponse(response);
-    client.send(encoded);
+  type: "HelloResponse",
+  handle: (ws, payload) => {
+    console.log(`Handled HelloResponse:`, decodeHelloResponse(payload));
+    console.log(`ConnectedClients: `, connectedClients.size)
+    ws.send(encodeWrapper({type: 'asd', payload: 'dsa'}))
   },
 };
