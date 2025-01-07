@@ -8,7 +8,16 @@ import { encodeHelloResponse } from "@messages/messages";
 const PORT = 8080;
 const connectedClients = new Set();
 
-// WebSocket server setup
+/**
+ * @typedef {WebSocket.Server & { 
+*   broadcast: (msg: string | Buffer | ArrayBuffer | Buffer[]) => void 
+* }} ExtendedWebSocketServer
+*/
+
+/**
+* WebSocket server instance with custom broadcast functionality.
+* @type {ExtendedWebSocketServer}
+*/
 const wss = new WebSocket.Server({ port: PORT });
 
 wss.on("connection", (ws) => {
@@ -48,6 +57,12 @@ wss.on("connection", (ws) => {
     connectedClients.delete(ws);
   });
 });
+
+wss.broadcast = (msg) => {
+  wss.clients.forEach(client => {
+    client.send(msg);
+  });
+};
 
 console.log(`WebSocket server is running on ws://localhost:${PORT}`);
 
