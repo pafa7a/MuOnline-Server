@@ -1,5 +1,5 @@
 import { encodeServerListResponse } from "@messages/messages";
-import { encodeHelloResponse, encodeWrapper } from "@server/messages/messages";
+import { decodeServerListResponse, decodeWrapper, encodeHelloResponse, encodeServerInfo, encodeWrapper } from "@server/messages/messages";
 import { wss } from "@server/server";
 
 export default {
@@ -8,9 +8,20 @@ export default {
   execute(args) {
     console.log("Refreshing server list...");
     const response = encodeWrapper({
-      type: 'HelloResponse',
-      payload: encodeHelloResponse({
-        message: "Testing from server"
+      type: 'ServerListResponse',
+      payload: encodeServerListResponse({
+        servers: [
+          {
+            name: 'test',
+            ip: 'IP',
+            port: 55901
+          },
+          {
+            name:(Math.random() + 1).toString(36).substring(7),
+            ip: 'IP2',
+            port: 55919
+          }
+        ]
       })
     })
     wss.broadcast(response);
