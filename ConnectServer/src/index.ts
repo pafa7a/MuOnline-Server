@@ -32,8 +32,6 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
     osType: getConnectedPlayerOSType(req.headers),
     osVersion: getConnectedPlayerOSVersion(req.headers)
   };
-  console.log(connectedClient.osType);
-  console.log(connectedClient.osVersion);
   connectedClients.add(connectedClient);
 
   const helloMessage = { message: "Hello, client!" };
