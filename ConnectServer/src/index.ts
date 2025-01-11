@@ -8,7 +8,7 @@ const PORT = 8080;
 const connectedClients = new Set<WebSocket>();
 
 interface ExtendedWebSocketServer extends WebSocketServer {
-  broadcast: (msg: string | Buffer | ArrayBuffer | Buffer[]) => void;
+  broadcast: (msg: Uint8Array<ArrayBufferLike>) => void;
 }
 
 const wss: ExtendedWebSocketServer = new WebSocketServer({ port: PORT }) as ExtendedWebSocketServer;
