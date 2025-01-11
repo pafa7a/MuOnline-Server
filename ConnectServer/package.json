@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
-    "dev": "nodemon --exec \"ts-node -r tsconfig-paths/register\" src/index.ts",
+    "dev": "tsx --watch src/index.ts",
     "build": "tsc && tsc-alias",
     "start": "node build/index.js",
-    "compile-proto": "ts-node src/scripts/compileProto.ts"
+    "compile-proto": "tsx src/scripts/compileProto.ts"
   },
   "author": "pafa7a",
   "license": "ISC",
@@ -19,10 +19,10 @@
     "@types/ws": "^8.5.13",
     "nodemon": "^3.1.9",
     "protobufjs": "^7.4.0",
-    "ts-node": "^10.2.1",
     "ts-proto": "^2.6.1",
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^3.12.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
 }

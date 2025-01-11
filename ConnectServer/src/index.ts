@@ -2,7 +2,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import cliRegistry from "@server/cliRegistry";
 import handlers from "@server/handlerRegistry";
 import readline from "readline";
-import { Wrapper, HelloResponse } from "@messages/connect";
+import { Wrapper } from "@messages/connect";
 import { IncomingMessage } from "http";
 import { getConnectedPlayerOSType, getConnectedPlayerOSVersion } from "@helpers/connectHelpers";
 
@@ -35,11 +35,12 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
   
   console.log(`Client connected. IP: ${connectedClient.remoteAddress}, Port: ${connectedClient.remotePort}, OS: ${connectedClient.osType} ${connectedClient.osVersion}`);
 
-  const helloMessage = { message: "Hello, client!" };
-  const helloPayload = HelloResponse.encode(helloMessage).finish();
-  const wrapper = { type: "HelloResponse", payload: helloPayload };
-  const encodedWrapper = Wrapper.encode(wrapper).finish();
-  ws.send(encodedWrapper);
+  // Send the init packet.
+  const initPacketWrapper = Wrapper.encode({
+    type: 'Init',
+    payload: new Uint8Array(),
+  }).finish();
+  ws.send(initPacketWrapper);
 
   ws.on("message", (data) => {
     try {

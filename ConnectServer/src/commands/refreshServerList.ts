@@ -1,5 +1,5 @@
-import { ServerListResponse, Wrapper } from "@messages/connect";
-import { connectedClients, wss } from "@server/index";
+import { SCServerListResponse, Wrapper } from "@messages/connect";
+import { wss } from "@server/index";
 
 export default {
   name: "refreshServerList",
@@ -8,7 +8,7 @@ export default {
     console.log("Refreshing server list...");
     const response = Wrapper.encode({
       type: 'ServerListResponse',
-      payload: ServerListResponse.encode({
+      payload: SCServerListResponse.encode({
         servers: [
           {
             name: 'test',

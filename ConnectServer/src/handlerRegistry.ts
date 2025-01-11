@@ -13,7 +13,9 @@ const handlers: { [key: string]: Handler } = {};
 
 fs.readdirSync(handlersDir).forEach((file) => {
   const handler: Handler = require(path.join(handlersDir, file)).default;
-  handlers[handler.type] = handler;
+  if (handler?.type) {
+    handlers[handler.type] = handler;
+  }
 });
 
 export default handlers;

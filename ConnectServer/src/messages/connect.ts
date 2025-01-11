@@ -14,20 +14,13 @@ export interface Wrapper {
   payload: Uint8Array;
 }
 
-export interface HelloResponse {
-  message: string;
-}
-
-export interface ServerListRequest {
-}
-
 export interface ServerInfo {
   name: string;
   ip: string;
   port: number;
 }
 
-export interface ServerListResponse {
+export interface SCServerListResponse {
   servers: ServerInfo[];
 }
 
@@ -103,107 +96,6 @@ export const Wrapper: MessageFns<Wrapper> = {
     const message = createBaseWrapper();
     message.type = object.type ?? "";
     message.payload = object.payload ?? new Uint8Array(0);
-    return message;
-  },
-};
-
-function createBaseHelloResponse(): HelloResponse {
-  return { message: "" };
-}
-
-export const HelloResponse: MessageFns<HelloResponse> = {
-  encode(message: HelloResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.message !== "") {
-      writer.uint32(10).string(message.message);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): HelloResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseHelloResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.message = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): HelloResponse {
-    return { message: isSet(object.message) ? globalThis.String(object.message) : "" };
-  },
-
-  toJSON(message: HelloResponse): unknown {
-    const obj: any = {};
-    if (message.message !== "") {
-      obj.message = message.message;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<HelloResponse>, I>>(base?: I): HelloResponse {
-    return HelloResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<HelloResponse>, I>>(object: I): HelloResponse {
-    const message = createBaseHelloResponse();
-    message.message = object.message ?? "";
-    return message;
-  },
-};
-
-function createBaseServerListRequest(): ServerListRequest {
-  return {};
-}
-
-export const ServerListRequest: MessageFns<ServerListRequest> = {
-  encode(_: ServerListRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ServerListRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseServerListRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(_: any): ServerListRequest {
-    return {};
-  },
-
-  toJSON(_: ServerListRequest): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<ServerListRequest>, I>>(base?: I): ServerListRequest {
-    return ServerListRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<ServerListRequest>, I>>(_: I): ServerListRequest {
-    const message = createBaseServerListRequest();
     return message;
   },
 };
@@ -300,22 +192,22 @@ export const ServerInfo: MessageFns<ServerInfo> = {
   },
 };
 
-function createBaseServerListResponse(): ServerListResponse {
+function createBaseSCServerListResponse(): SCServerListResponse {
   return { servers: [] };
 }
 
-export const ServerListResponse: MessageFns<ServerListResponse> = {
-  encode(message: ServerListResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const SCServerListResponse: MessageFns<SCServerListResponse> = {
+  encode(message: SCServerListResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     for (const v of message.servers) {
       ServerInfo.encode(v!, writer.uint32(10).fork()).join();
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ServerListResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): SCServerListResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseServerListResponse();
+    const message = createBaseSCServerListResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -336,13 +228,13 @@ export const ServerListResponse: MessageFns<ServerListResponse> = {
     return message;
   },
 
-  fromJSON(object: any): ServerListResponse {
+  fromJSON(object: any): SCServerListResponse {
     return {
       servers: globalThis.Array.isArray(object?.servers) ? object.servers.map((e: any) => ServerInfo.fromJSON(e)) : [],
     };
   },
 
-  toJSON(message: ServerListResponse): unknown {
+  toJSON(message: SCServerListResponse): unknown {
     const obj: any = {};
     if (message.servers?.length) {
       obj.servers = message.servers.map((e) => ServerInfo.toJSON(e));
@@ -350,11 +242,11 @@ export const ServerListResponse: MessageFns<ServerListResponse> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<ServerListResponse>, I>>(base?: I): ServerListResponse {
-    return ServerListResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<SCServerListResponse>, I>>(base?: I): SCServerListResponse {
+    return SCServerListResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<ServerListResponse>, I>>(object: I): ServerListResponse {
-    const message = createBaseServerListResponse();
+  fromPartial<I extends Exact<DeepPartial<SCServerListResponse>, I>>(object: I): SCServerListResponse {
+    const message = createBaseSCServerListResponse();
     message.servers = object.servers?.map((e) => ServerInfo.fromPartial(e)) || [];
     return message;
   },
