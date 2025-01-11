@@ -1,12 +1,12 @@
-import { SCServerListResponse, Wrapper } from "@messages/connect";
+import { ServerList, Wrapper } from "@messages/connect";
 import { IHandler } from "./types";
 
-const CSRequestServerList: IHandler = {
-  type: "CSRequestServerList",
+const RequestServerList: IHandler = {
+  type: "RequestServerList",
   handle: (ws, _) => {
     const response = Wrapper.encode({
-      type: "SCRequestServerList",
-      payload: SCServerListResponse.encode({
+      type: "ServerList",
+      payload: ServerList.encode({
         servers: [
           {
             name: "test",
@@ -25,4 +25,4 @@ const CSRequestServerList: IHandler = {
   },
 };
 
-export default CSRequestServerList;
+export default RequestServerList;

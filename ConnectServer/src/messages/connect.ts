@@ -20,7 +20,7 @@ export interface ServerInfo {
   port: number;
 }
 
-export interface SCServerListResponse {
+export interface ServerList {
   servers: ServerInfo[];
 }
 
@@ -192,22 +192,22 @@ export const ServerInfo: MessageFns<ServerInfo> = {
   },
 };
 
-function createBaseSCServerListResponse(): SCServerListResponse {
+function createBaseServerList(): ServerList {
   return { servers: [] };
 }
 
-export const SCServerListResponse: MessageFns<SCServerListResponse> = {
-  encode(message: SCServerListResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const ServerList: MessageFns<ServerList> = {
+  encode(message: ServerList, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     for (const v of message.servers) {
       ServerInfo.encode(v!, writer.uint32(10).fork()).join();
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): SCServerListResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): ServerList {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseSCServerListResponse();
+    const message = createBaseServerList();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -228,13 +228,13 @@ export const SCServerListResponse: MessageFns<SCServerListResponse> = {
     return message;
   },
 
-  fromJSON(object: any): SCServerListResponse {
+  fromJSON(object: any): ServerList {
     return {
       servers: globalThis.Array.isArray(object?.servers) ? object.servers.map((e: any) => ServerInfo.fromJSON(e)) : [],
     };
   },
 
-  toJSON(message: SCServerListResponse): unknown {
+  toJSON(message: ServerList): unknown {
     const obj: any = {};
     if (message.servers?.length) {
       obj.servers = message.servers.map((e) => ServerInfo.toJSON(e));
@@ -242,11 +242,11 @@ export const SCServerListResponse: MessageFns<SCServerListResponse> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<SCServerListResponse>, I>>(base?: I): SCServerListResponse {
-    return SCServerListResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<ServerList>, I>>(base?: I): ServerList {
+    return ServerList.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<SCServerListResponse>, I>>(object: I): SCServerListResponse {
-    const message = createBaseSCServerListResponse();
+  fromPartial<I extends Exact<DeepPartial<ServerList>, I>>(object: I): ServerList {
+    const message = createBaseServerList();
     message.servers = object.servers?.map((e) => ServerInfo.fromPartial(e)) || [];
     return message;
   },
