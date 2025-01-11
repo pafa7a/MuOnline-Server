@@ -10,8 +10,6 @@ interface Handler {
 const helloHandler: Handler = {
   type: "HelloResponse",
   handle: (ws, payload) => {
-    console.log(`Handled HelloResponse:`, HelloResponse.decode(payload));
-    console.log(`ConnectedClients: `, connectedClients.size);
   },
 };
 

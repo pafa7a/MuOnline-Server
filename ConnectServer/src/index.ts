@@ -24,7 +24,6 @@ interface ExtendedWebSocketServer extends WebSocketServer {
 const wss: ExtendedWebSocketServer = new WebSocketServer({ port: PORT }) as ExtendedWebSocketServer;
 
 wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
-  console.log("Client connected");
   const connectedClient: ConnectedClient = {
     ws,
     remoteAddress: req.socket.remoteAddress || "",
@@ -33,6 +32,8 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
     osVersion: getConnectedPlayerOSVersion(req.headers)
   };
   connectedClients.add(connectedClient);
+  
+  console.log(`Client connected. IP: ${connectedClient.remoteAddress}, Port: ${connectedClient.remotePort}, OS: ${connectedClient.osType} ${connectedClient.osVersion}`);
 
   const helloMessage = { message: "Hello, client!" };
   const helloPayload = HelloResponse.encode(helloMessage).finish();
