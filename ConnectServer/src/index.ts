@@ -23,6 +23,14 @@ interface ExtendedWebSocketServer extends WebSocketServer {
 
 const wss: ExtendedWebSocketServer = new WebSocketServer({ port: PORT }) as ExtendedWebSocketServer;
 
+const originalSend = WebSocket.prototype.send;
+WebSocket.prototype.send = function (data: any, ...args: any[]) {
+  console.log(`S->C: ${Wrapper.decode(data).type}`);
+  const options = args[0] || {};
+  const cb = args[1] || (() => {});
+  originalSend.apply(this, [data, options, cb]);
+};
+
 wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
   const connectedClient: ConnectedClient = {
     ws,
@@ -50,7 +58,7 @@ wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
         return;
       }
 
-      console.log(`Received message of type: ${type}`);
+      console.log(`C->S: ${type}`);
 
       const handler = handlers[type];
       if (handler && typeof handler.handle === "function" && payload) {
