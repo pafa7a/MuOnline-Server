@@ -13,7 +13,8 @@
       "@messages/*": ["./messages/*"],
       "@server/*": ["./*"],
       "@commands/*": ["./commands/*"],
-      "@handlers/*": ["./handlers/*"]
+      "@handlers/*": ["./handlers/*"],
+      "@helpers/*": ["./helpers/*"]
     }
   },
   "include": ["src/**/*"],

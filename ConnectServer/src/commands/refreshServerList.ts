@@ -1,11 +1,12 @@
 import { ServerListResponse, Wrapper } from "@messages/connect";
-import { wss } from "@server/index";
+import { connectedClients, wss } from "@server/index";
 
 export default {
   name: "refreshServerList",
   description: "Send the updated server list to all connected clients",
   execute(args: any) {
     console.log("Refreshing server list...");
+    console.log(connectedClients);
     const response = Wrapper.encode({
       type: 'ServerListResponse',
       payload: ServerListResponse.encode({

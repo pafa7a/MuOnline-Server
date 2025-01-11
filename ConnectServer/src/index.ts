@@ -1,11 +1,21 @@
-import { WebSocket, WebSocketServer } from "ws";
+import WebSocket, { WebSocketServer } from "ws";
 import cliRegistry from "@server/cliRegistry";
 import handlers from "@server/handlerRegistry";
 import readline from "readline";
 import { Wrapper, HelloResponse } from "@messages/connect";
+import { IncomingMessage } from "http";
+import { getConnectedPlayerOSType, getConnectedPlayerOSVersion } from "@helpers/connectHelpers";
+
+interface ConnectedClient {
+  ws: WebSocket;
+  remoteAddress: String;
+  remotePort: Number;
+  osType: String;
+  osVersion: String;
+}
 
 const PORT = 8080;
-const connectedClients = new Set<WebSocket>();
+const connectedClients = new Set<ConnectedClient>();
 
 interface ExtendedWebSocketServer extends WebSocketServer {
   broadcast: (msg: Uint8Array<ArrayBufferLike>) => void;
@@ -13,9 +23,18 @@ interface ExtendedWebSocketServer extends WebSocketServer {
 
 const wss: ExtendedWebSocketServer = new WebSocketServer({ port: PORT }) as ExtendedWebSocketServer;
 
-wss.on("connection", (ws: WebSocket) => {
+wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
   console.log("Client connected");
-  connectedClients.add(ws);
+  const connectedClient: ConnectedClient = {
+    ws,
+    remoteAddress: req.socket.remoteAddress || "",
+    remotePort: req.socket.remotePort || 0,
+    osType: getConnectedPlayerOSType(req.headers),
+    osVersion: getConnectedPlayerOSVersion(req.headers)
+  };
+  console.log(connectedClient.osType);
+  console.log(connectedClient.osVersion);
+  connectedClients.add(connectedClient);
 
   const helloMessage = { message: "Hello, client!" };
   const helloPayload = HelloResponse.encode(helloMessage).finish();
@@ -46,7 +65,7 @@ wss.on("connection", (ws: WebSocket) => {
 
   ws.on("close", () => {
     console.log("Client disconnected");
-    connectedClients.delete(ws);
+    connectedClients.delete(connectedClient);
   });
 });
 
