@@ -1,32 +1,27 @@
 {
   "name": "connectserver",
   "version": "1.0.0",
-  "main": "src/server.js",
+  "main": "build/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "build": "babel src --out-dir build",
-    "start": "node build/index.js",
-    "compile-proto": "node scripts/compileProto.js"
+    "dev": "nodemon --exec \"ts-node -r tsconfig-paths/register\" src/index.ts",
+    "build": "tsc",
+    "start": "node -r tsconfig-paths/register build/index.js",
+    "compile-proto": "ts-node src/scripts/compileProto.ts"
   },
   "author": "pafa7a",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/register": "^7.25.9",
-    "module-alias": "^2.2.3",
-    "protobufjs": "^7.4.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.26.4",
-    "@babel/preset-env": "^7.26.0",
-    "nodemon": "^3.1.9"
-  },
-  "_moduleAliases": {
-    "@messages": "./src/messages",
-    "@server": "./src/",
-    "@commands": "./src/commands",
-    "@handlers": "./src/handlers"
+    "@types/node": "^22.10.5",
+    "@types/ws": "^8.5.13",
+    "nodemon": "^3.1.9",
+    "protobufjs": "^7.4.0",
+    "ts-node": "^10.2.1",
+    "ts-proto": "^2.6.1",
+    "tsconfig-paths": "^3.12.0",
+    "typescript": "^5.7.3"
   }
 }
