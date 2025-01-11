@@ -12,13 +12,11 @@ interface Command {
 const commands: { [key: string]: Command } = {};
 
 fs.readdirSync(commandsDir).forEach((file) => {
-  if (file.endsWith(".ts")) {
-    const command: Command = require(path.join(commandsDir, file)).default;
-    if (command.name && typeof command.execute === "function") {
-      commands[command.name] = command;
-    } else {
-      console.warn(`Skipping invalid command file: ${file}`);
-    }
+  const command: Command = require(path.join(commandsDir, file)).default;
+  if (command.name && typeof command.execute === "function") {
+    commands[command.name] = command;
+  } else {
+    console.warn(`Skipping invalid command file: ${file}`);
   }
 });
 
