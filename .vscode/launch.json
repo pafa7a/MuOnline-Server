@@ -4,42 +4,122 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Dev Server (ConnectServer)",
+      "name": "[CS] Dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "cwd": "${workspaceFolder}/ConnectServer",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "hidden": false,
+        "group": "CS",
+        "order": 1
+      }
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Build Server (ConnectServer)",
+      "name": "[CS] Build",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "build"],
       "cwd": "${workspaceFolder}/ConnectServer",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "hidden": false,
+        "group": "CS",
+        "order": 2
+      }
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Start Server (ConnectServer)",
+      "name": "[CS] Start",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start"],
       "cwd": "${workspaceFolder}/ConnectServer",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "hidden": false,
+        "group": "CS",
+        "order": 3
+      }
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Compile Proto Files (ConnectServer)",
+      "name": "[CS] Compile Proto",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "compile-proto"],
       "cwd": "${workspaceFolder}/ConnectServer",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
-    }
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "hidden": false,
+        "group": "CS",
+        "order": 4
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "[GS] Dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/GameServer",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "hidden": false,
+        "group": "GS",
+        "order": 1
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "[GS] Build",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "build"],
+      "cwd": "${workspaceFolder}/GameServer",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "hidden": false,
+        "group": "GS",
+        "order": 2
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "[GS] Start",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
+      "cwd": "${workspaceFolder}/GameServer",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "hidden": false,
+        "group": "GS",
+        "order": 3
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "[GS] Compile Proto",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "compile-proto"],
+      "cwd": "${workspaceFolder}/GameServer",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "presentation": {
+        "hidden": false,
+        "group": "GS",
+        "order": 4
+      }
+    },
   ]
 }

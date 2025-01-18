@@ -1,4 +1,4 @@
-import { ServerList, Wrapper } from "@messages/connect";
+import { ServerList, Wrapper } from "@/messages/connect";
 import { IHandler } from "./types";
 
 const RequestServerList: IHandler = {

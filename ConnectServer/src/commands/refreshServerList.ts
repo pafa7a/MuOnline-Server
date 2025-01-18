@@ -1,5 +1,5 @@
-import { ServerList, Wrapper } from "@messages/connect";
-import { wss } from "@server/index";
+import { ServerList, Wrapper } from "@/messages/connect";
+import { wss } from "@/webSocketServer";
 
 export default {
   name: "refreshServerList",

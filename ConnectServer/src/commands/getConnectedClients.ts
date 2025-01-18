@@ -1,4 +1,4 @@
-import { connectedClients } from "@server/index";
+import { connectedClients } from "@/webSocketServer";
 
 export default {
   name: "getConnectedClients",
