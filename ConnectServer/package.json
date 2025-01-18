@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "tsx --watch src/index.ts",
     "build": "tsc && tsc-alias",
+    "postbuild": "xcopy /E /I src\\config build\\config",
     "start": "node build/index.js",
     "compile-proto": "tsx src/scripts/compileProto.ts"
   },

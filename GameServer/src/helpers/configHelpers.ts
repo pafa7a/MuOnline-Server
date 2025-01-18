@@ -3,6 +3,12 @@ import path from 'path';
 
 const configCache: { [key: string]: any } = {};
 
+// Get config path based on current directory
+const getConfigPath = () => {
+  const currentDir = __dirname;
+  return path.join(currentDir, '..', 'config');
+};
+
 export const loadAllConfigs = () => {
   const traverseDirectory = (currentPath: string, relativePath = '') => {
     const files = fs.readdirSync(currentPath);
@@ -18,7 +24,7 @@ export const loadAllConfigs = () => {
       } else if (file.endsWith('.json')) {
         // Read and parse JSON files
         try {
-          const cacheKey = relativeFilePath.replace(path.sep, '/').replace('.json', ''); // Remove .json from the key
+          const cacheKey = relativeFilePath.replace(path.sep, '/').replace('.json', '');
           configCache[cacheKey] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
           console.log(`Loaded config: ${filePath}`);
         } catch (error) {
@@ -28,7 +34,7 @@ export const loadAllConfigs = () => {
     }
   };
 
-  traverseDirectory('./src/config');
+  traverseDirectory(getConfigPath());
 };
 
 export const getConfig = (name: string, path = '') => {

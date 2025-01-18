@@ -13,6 +13,6 @@
       "@/*": ["./*"],
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/config/**/*.json"],
   "exclude": ["node_modules", "build"]
 }
