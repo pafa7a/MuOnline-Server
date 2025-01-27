@@ -1,8 +1,7 @@
 import WebSocket from "ws";
 import { getConfig } from "./configHelpers";
 import { Wrapper } from "@/messages/gameserver";
-import path from "path";
-import fs from "fs";
+import { getAllHandlers } from "@/helpers/getAllHandlers";
 
 let connectServerWs: WebSocket | null = null;
 
@@ -10,7 +9,7 @@ export const connectToConnectServer = () => {
   const handlers = getAllHandlers();
   const address = getConfig('common', 'connectServerAddress');
   const port = getConfig('common', 'connectServerPort');
-  const serverCode = getConfig('common', 'code');
+  const serverCode = getConfig('common', 'serverCode');
   const serverName = getConfig('common', 'name');
   const serverPort = getConfig('common', 'port');
   const serverGroup = getConfig('common', 'group');
@@ -37,13 +36,6 @@ export const connectToConnectServer = () => {
       const cb = args[1] || (() => { });
       originalSend.apply(this, [data, options, cb]);
     };
-
-    connectServerWs.send(Wrapper.encode({
-      type: "ServerRegister",
-      payload: new Uint8Array(),
-    }).finish());
-    
-    // @TODO: Interval to send info to connectServer.
   });
 
   connectServerWs.on('message', (data) => {
@@ -56,7 +48,7 @@ export const connectToConnectServer = () => {
 
       const handler = handlers[type];
       if (connectServerWs && handler && typeof handler.handle === "function" && payload) {
-        handler.handle(connectServerWs, payload);
+        handler.handle(connectServerWs, payload, 'connectServer');
       } else {
         console.error(`No handler found for type: ${type}`);
       }
@@ -77,22 +69,3 @@ export const connectToConnectServer = () => {
 };
 
 export const getConnectServerConnection = () => connectServerWs;
-
-const getAllHandlers = () => {
-  const handlersDir = path.join(__dirname, "../handlers");
-
-  interface Handler {
-    type: string;
-    handle: (ws: WebSocket, payload: Uint8Array) => void;
-  }
-
-  const handlers: { [key: string]: Handler } = {};
-
-  fs.readdirSync(handlersDir).forEach((file) => {
-    const handler: Handler = require(path.join(handlersDir, file)).default;
-    if (handler?.type) {
-      handlers[handler.type] = handler;
-    }
-  });
-  return handlers;
-};

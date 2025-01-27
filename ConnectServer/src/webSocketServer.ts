@@ -109,12 +109,13 @@ const createWebSocketServer = (port: number, clients: Set<ConnectedClient> | Map
     });
 
     ws.on("close", () => {
-      console.log(`${serverType.toUpperCase()} Client disconnected`);
       if (serverType === 'external') {
         (clients as Set<ConnectedClient>).delete(connectedClient as ConnectedClient);
+        console.log(`${serverType.toUpperCase()} Client disconnected.`);
       } else {
-        const id = Number(req?.headers?.id) || 0;
+        const id = Number(req?.headers['x-server-code']) || 0;
         (clients as Map<Number, ConnectedInternalClient>).delete(id);
+        console.log(`${serverType.toUpperCase()} GameServer disconnected.`);
       }
     });
   });

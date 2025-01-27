@@ -1,10 +1,9 @@
-import path from "path";
-import fs from "fs";
 import WebSocket, { WebSocketServer } from "ws";
 import { Wrapper } from "@/messages/gameserver";
 import { IncomingMessage } from "http";
 import { getConnectedPlayerOSType, getConnectedPlayerOSVersion } from "@/helpers/connectHelpers";
 import { getConfig } from "@/helpers/configHelpers";
+import { getAllHandlers } from "@/helpers/getAllHandlers";
 
 interface ConnectedClient {
   ws: WebSocket;
@@ -66,7 +65,7 @@ export const initWebSocketServer = () => {
 
         const handler = handlers[type];
         if (handler && typeof handler.handle === "function" && payload) {
-          handler.handle(ws, payload);
+          handler.handle(ws, payload, "client");
         } else {
           console.error(`No handler found for type: ${type}`);
         }
@@ -88,23 +87,4 @@ export const initWebSocketServer = () => {
   };
 
   console.log(`WebSocket server is running on ws://localhost:${PORT}`);
-};
-
-const getAllHandlers = () => {
-  const handlersDir = path.join(__dirname, "handlers");
-
-  interface Handler {
-    type: string;
-    handle: (ws: WebSocket, payload: Uint8Array) => void;
-  }
-
-  const handlers: { [key: string]: Handler } = {};
-
-  fs.readdirSync(handlersDir).forEach((file) => {
-    const handler: Handler = require(path.join(handlersDir, file)).default;
-    if (handler?.type) {
-      handlers[handler.type] = handler;
-    }
-  });
-  return handlers;
 };

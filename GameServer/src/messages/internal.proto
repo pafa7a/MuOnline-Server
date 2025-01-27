@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message Wrapper {
+  string type = 1;
+  bytes payload = 2;
+}
+
+message GameServerInfo {
+  int32 onlinePlayers = 1;
+  float loadPercentage = 2;
+}
