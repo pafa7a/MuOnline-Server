@@ -27,15 +27,15 @@ export const initWebSocketServer = () => {
   const PORT = getConfig('common', 'port');
   wss = new WebSocketServer({ port: PORT }) as ExtendedWebSocketServer;
 
-  const originalSend = WebSocket.prototype.send;
-  WebSocket.prototype.send = function (data: any, ...args: any[]) {
-    console.log(`S->C: ${Wrapper.decode(data).type}`);
-    const options = args[0] || {};
-    const cb = args[1] || (() => {});
-    originalSend.apply(this, [data, options, cb]);
-  };
-
   wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
+    const originalSend = ws.send;
+    ws.send = function (data: any, ...args: any[]) {
+      console.log(`S->C: ${Wrapper.decode(data).type}`);
+      const options = args[0] || {};
+      const cb = args[1] || (() => { });
+      originalSend.apply(this, [data, options, cb]);
+    };
+
     const connectedClient: ConnectedClient = {
       ws,
       remoteAddress: req.socket.remoteAddress || "",
@@ -44,7 +44,7 @@ export const initWebSocketServer = () => {
       osVersion: getConnectedPlayerOSVersion(req.headers)
     };
     connectedClients.add(connectedClient);
-    
+
     console.log(`Client connected. IP: ${connectedClient.remoteAddress}, Port: ${connectedClient.remotePort}, OS: ${connectedClient.osType} ${connectedClient.osVersion}`);
 
     // Send the init packet.

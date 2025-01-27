@@ -1,5 +1,5 @@
 import { ServerGroupList, Wrapper } from "@/messages/connect";
-import { wss } from "@/webSocketServer";
+import { externalWss } from "@/webSocketServer";
 
 export default {
   name: "refreshServerList",
@@ -58,6 +58,6 @@ export default {
         ],
       }).finish(),
     }).finish();
-    wss.broadcast(response);
+    externalWss.broadcast(response);
   },
 };

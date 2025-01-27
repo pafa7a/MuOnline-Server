@@ -1,3 +1,4 @@
 {
-  "port": 44405
+  "port": 44405,
+  "internalPort": 44406
 }

@@ -14,38 +14,68 @@ interface ConnectedClient {
   osVersion: String;
 }
 
-export const connectedClients = new Set<ConnectedClient>();
+interface ConnectedInternalClient {
+  ws: WebSocket;
+  name: String;
+  port: Number;
+  group: Number;
+  IP: String;
+}
 
 interface ExtendedWebSocketServer extends WebSocketServer {
   broadcast: (msg: Uint8Array<ArrayBufferLike>) => void;
 }
 
-export let wss: ExtendedWebSocketServer;
+export const externalClients = new Set<ConnectedClient>();
+export const internalClients = new Map<Number, ConnectedInternalClient>();
 
-export const initWebSocketServer = () => {
+export let externalWss: ExtendedWebSocketServer;
+export let internalWss: ExtendedWebSocketServer;
+
+const createWebSocketServer = (port: number, clients: Set<ConnectedClient> | Map<Number, ConnectedInternalClient>, serverType: 'external' | 'internal') => {
   const handlers = getAllHandlers();
-  const PORT = getConfig('common', 'port');
-  wss = new WebSocketServer({ port: PORT }) as ExtendedWebSocketServer;
-
-  const originalSend = WebSocket.prototype.send;
-  WebSocket.prototype.send = function (data: any, ...args: any[]) {
-    console.log(`S->C: ${Wrapper.decode(data).type}`);
-    const options = args[0] || {};
-    const cb = args[1] || (() => { });
-    originalSend.apply(this, [data, options, cb]);
-  };
+  const wss = new WebSocketServer({ port }) as ExtendedWebSocketServer;
 
   wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
-    const connectedClient: ConnectedClient = {
-      ws,
-      remoteAddress: req.socket.remoteAddress || "",
-      remotePort: req.socket.remotePort || 0,
-      osType: getConnectedPlayerOSType(req.headers),
-      osVersion: getConnectedPlayerOSVersion(req.headers)
+    const originalSend = ws.send;
+    ws.send = function (data: any, ...args: any[]) {
+      let direction = 'CS->C';
+      if (serverType === 'internal') {
+        direction = 'CS->GS';
+      }
+      console.log(`${serverType.toUpperCase()} ${direction}: ${Wrapper.decode(data).type}`);
+      const options = args[0] || {};
+      const cb = args[1] || (() => { });
+      originalSend.apply(this, [data, options, cb]);
     };
-    connectedClients.add(connectedClient);
 
-    console.log(`Client connected. IP: ${connectedClient.remoteAddress}, Port: ${connectedClient.remotePort}, OS: ${connectedClient.osType} ${connectedClient.osVersion}`);
+    let connectedClient: ConnectedClient | ConnectedInternalClient;
+
+    if (serverType === 'external') {
+      connectedClient = {
+        ws,
+        remoteAddress: req.socket.remoteAddress || "",
+        remotePort: req.socket.remotePort || 0,
+        osType: getConnectedPlayerOSType(req.headers),
+        osVersion: getConnectedPlayerOSVersion(req.headers)
+      };
+      (clients as Set<ConnectedClient>).add(connectedClient);
+
+      console.log(`Client connected. IP: ${connectedClient.remoteAddress}, Port: ${connectedClient.remotePort}, OS: ${connectedClient.osType} ${connectedClient.osVersion}`);
+    }
+    else {
+      const id = Number(req?.headers['x-server-code']) || 0;
+      connectedClient = {
+        ws,
+        name: req?.headers['x-server-name']?.toString() || "",
+        port: Number(req?.headers['x-server-port']) || 0,
+        group: Number(req?.headers['x-server-group']) || 0,
+        IP: req.socket.remoteAddress || "",
+      };
+      (clients as Map<Number, ConnectedInternalClient>).set(id, connectedClient);
+
+      console.log(`GameServer connected. ID: ${id}, Name: ${connectedClient.name}, Port: ${connectedClient.port}, Group: ${connectedClient.group}, IP: ${connectedClient.IP}`);
+    }
 
     // Send the init packet.
     const initPacketWrapper = Wrapper.encode({
@@ -58,11 +88,14 @@ export const initWebSocketServer = () => {
       try {
         const wrapper = Wrapper.decode(data as Uint8Array);
         const { type, payload } = wrapper;
-        if (!type) {
-          return;
+        if (!type) return;
+
+        let direction = 'C->CS';
+        if (serverType === 'internal') {
+          direction = 'GS->CS';
         }
 
-        console.log(`C->S: ${type}`);
+        console.log(`${serverType.toUpperCase()} ${direction}: ${type}`);
 
         const handler = handlers[type];
         if (handler && typeof handler.handle === "function" && payload) {
@@ -76,8 +109,13 @@ export const initWebSocketServer = () => {
     });
 
     ws.on("close", () => {
-      console.log("Client disconnected");
-      connectedClients.delete(connectedClient);
+      console.log(`${serverType.toUpperCase()} Client disconnected`);
+      if (serverType === 'external') {
+        (clients as Set<ConnectedClient>).delete(connectedClient as ConnectedClient);
+      } else {
+        const id = Number(req?.headers?.id) || 0;
+        (clients as Map<Number, ConnectedInternalClient>).delete(id);
+      }
     });
   });
 
@@ -87,7 +125,16 @@ export const initWebSocketServer = () => {
     });
   };
 
-  console.log(`WebSocket server is running on ws://localhost:${PORT}`);
+  console.log(`${serverType.toUpperCase()} WebSocket server is running on ws://localhost:${port}`);
+  return wss;
+};
+
+export const initWebSocketServer = () => {
+  const EXTERNAL_PORT = getConfig('common', 'port');
+  const INTERNAL_PORT = getConfig('common', 'internalPort');
+
+  externalWss = createWebSocketServer(EXTERNAL_PORT, externalClients, 'external');
+  internalWss = createWebSocketServer(INTERNAL_PORT, internalClients, 'internal');
 };
 
 const getAllHandlers = () => {

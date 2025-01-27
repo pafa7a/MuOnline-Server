@@ -1,10 +1,11 @@
 {
   "name": "GS 1",
   "code": 0,
+  "group": 0,
   "port": 55901,
   "version": "10405",
   "serial": "TbYehR2hFUPBKgZj",
   "maxUsers": 1000,
   "connectServerAddress": "127.0.0.1",
-  "connectServerPort": 55557
+  "connectServerPort": 44406
 }
