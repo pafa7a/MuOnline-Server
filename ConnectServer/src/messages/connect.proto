@@ -11,8 +11,15 @@ message ServerInfo {
   string name = 1;
   string ip = 2;
   int32 port = 3;
+  int32 id = 4;
+  float loadPercentage = 5;
 }
 
-message ServerList {
-  repeated ServerInfo servers = 1;
+message ServerGroupInfo {
+  string name = 1;
+  repeated ServerInfo servers = 2;
+}
+
+message ServerGroupList {
+  repeated ServerGroupInfo serverGroups = 1;
 }

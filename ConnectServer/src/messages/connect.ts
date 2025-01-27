@@ -18,10 +18,17 @@ export interface ServerInfo {
   name: string;
   ip: string;
   port: number;
+  id: number;
+  loadPercentage: number;
 }
 
-export interface ServerList {
+export interface ServerGroupInfo {
+  name: string;
   servers: ServerInfo[];
+}
+
+export interface ServerGroupList {
+  serverGroups: ServerGroupInfo[];
 }
 
 function createBaseWrapper(): Wrapper {
@@ -101,7 +108,7 @@ export const Wrapper: MessageFns<Wrapper> = {
 };
 
 function createBaseServerInfo(): ServerInfo {
-  return { name: "", ip: "", port: 0 };
+  return { name: "", ip: "", port: 0, id: 0, loadPercentage: 0 };
 }
 
 export const ServerInfo: MessageFns<ServerInfo> = {
@@ -114,6 +121,12 @@ export const ServerInfo: MessageFns<ServerInfo> = {
     }
     if (message.port !== 0) {
       writer.uint32(24).int32(message.port);
+    }
+    if (message.id !== 0) {
+      writer.uint32(32).int32(message.id);
+    }
+    if (message.loadPercentage !== 0) {
+      writer.uint32(45).float(message.loadPercentage);
     }
     return writer;
   },
@@ -149,6 +162,22 @@ export const ServerInfo: MessageFns<ServerInfo> = {
           message.port = reader.int32();
           continue;
         }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.id = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 45) {
+            break;
+          }
+
+          message.loadPercentage = reader.float();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -163,6 +192,8 @@ export const ServerInfo: MessageFns<ServerInfo> = {
       name: isSet(object.name) ? globalThis.String(object.name) : "",
       ip: isSet(object.ip) ? globalThis.String(object.ip) : "",
       port: isSet(object.port) ? globalThis.Number(object.port) : 0,
+      id: isSet(object.id) ? globalThis.Number(object.id) : 0,
+      loadPercentage: isSet(object.loadPercentage) ? globalThis.Number(object.loadPercentage) : 0,
     };
   },
 
@@ -177,6 +208,12 @@ export const ServerInfo: MessageFns<ServerInfo> = {
     if (message.port !== 0) {
       obj.port = Math.round(message.port);
     }
+    if (message.id !== 0) {
+      obj.id = Math.round(message.id);
+    }
+    if (message.loadPercentage !== 0) {
+      obj.loadPercentage = message.loadPercentage;
+    }
     return obj;
   },
 
@@ -188,31 +225,44 @@ export const ServerInfo: MessageFns<ServerInfo> = {
     message.name = object.name ?? "";
     message.ip = object.ip ?? "";
     message.port = object.port ?? 0;
+    message.id = object.id ?? 0;
+    message.loadPercentage = object.loadPercentage ?? 0;
     return message;
   },
 };
 
-function createBaseServerList(): ServerList {
-  return { servers: [] };
+function createBaseServerGroupInfo(): ServerGroupInfo {
+  return { name: "", servers: [] };
 }
 
-export const ServerList: MessageFns<ServerList> = {
-  encode(message: ServerList, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const ServerGroupInfo: MessageFns<ServerGroupInfo> = {
+  encode(message: ServerGroupInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
     for (const v of message.servers) {
-      ServerInfo.encode(v!, writer.uint32(10).fork()).join();
+      ServerInfo.encode(v!, writer.uint32(18).fork()).join();
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ServerList {
+  decode(input: BinaryReader | Uint8Array, length?: number): ServerGroupInfo {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseServerList();
+    const message = createBaseServerGroupInfo();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
           if (tag !== 10) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
             break;
           }
 
@@ -228,26 +278,93 @@ export const ServerList: MessageFns<ServerList> = {
     return message;
   },
 
-  fromJSON(object: any): ServerList {
+  fromJSON(object: any): ServerGroupInfo {
     return {
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
       servers: globalThis.Array.isArray(object?.servers) ? object.servers.map((e: any) => ServerInfo.fromJSON(e)) : [],
     };
   },
 
-  toJSON(message: ServerList): unknown {
+  toJSON(message: ServerGroupInfo): unknown {
     const obj: any = {};
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
     if (message.servers?.length) {
       obj.servers = message.servers.map((e) => ServerInfo.toJSON(e));
     }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<ServerList>, I>>(base?: I): ServerList {
-    return ServerList.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<ServerGroupInfo>, I>>(base?: I): ServerGroupInfo {
+    return ServerGroupInfo.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<ServerList>, I>>(object: I): ServerList {
-    const message = createBaseServerList();
+  fromPartial<I extends Exact<DeepPartial<ServerGroupInfo>, I>>(object: I): ServerGroupInfo {
+    const message = createBaseServerGroupInfo();
+    message.name = object.name ?? "";
     message.servers = object.servers?.map((e) => ServerInfo.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseServerGroupList(): ServerGroupList {
+  return { serverGroups: [] };
+}
+
+export const ServerGroupList: MessageFns<ServerGroupList> = {
+  encode(message: ServerGroupList, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.serverGroups) {
+      ServerGroupInfo.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ServerGroupList {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseServerGroupList();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.serverGroups.push(ServerGroupInfo.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ServerGroupList {
+    return {
+      serverGroups: globalThis.Array.isArray(object?.serverGroups)
+        ? object.serverGroups.map((e: any) => ServerGroupInfo.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: ServerGroupList): unknown {
+    const obj: any = {};
+    if (message.serverGroups?.length) {
+      obj.serverGroups = message.serverGroups.map((e) => ServerGroupInfo.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ServerGroupList>, I>>(base?: I): ServerGroupList {
+    return ServerGroupList.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ServerGroupList>, I>>(object: I): ServerGroupList {
+    const message = createBaseServerGroupList();
+    message.serverGroups = object.serverGroups?.map((e) => ServerGroupInfo.fromPartial(e)) || [];
     return message;
   },
 };

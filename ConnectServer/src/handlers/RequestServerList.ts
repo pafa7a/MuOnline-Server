@@ -1,24 +1,59 @@
-import { ServerList, Wrapper } from "@/messages/connect";
+import { ServerGroupList, Wrapper } from "@/messages/connect";
 import { IHandler } from "./types";
 
 const RequestServerList: IHandler = {
-  type: "RequestServerList",
+  type: "RequestServerGroupList",
   handle: (ws, _) => {
     const response = Wrapper.encode({
-      type: "ServerList",
-      payload: ServerList.encode({
-        servers: [
+      type: "ServerGroupList",
+      payload: ServerGroupList.encode({
+        serverGroups: [
           {
-            name: "test",
-            ip: "IP",
-            port: 55901,
+            name: "PvP",
+            servers: [
+              {
+                id: 0,
+                name: "Test Server",
+                ip: "127.0.0.1",
+                port: 55901,
+                loadPercentage: 0.5,
+              },
+              {
+                id: 1,
+                name: "Test Server2",
+                ip: "127.0.0.1",
+                port: 55903,
+                loadPercentage: 0.1,
+              }
+            ],
           },
           {
-            name: (Math.random() + 1).toString(36).substring(7),
-            ip: "IP2",
-            port: 55919,
-          },
-        ]
+            name: "NoN PvP " + Math.floor(Math.random() * 101),
+            servers: [
+              {
+                id: 2,
+                name: "Test Server " + Math.floor(Math.random() * 101),
+                ip: "127.0.0.1",
+                port: 55910,
+                loadPercentage: 0.5,
+              },
+              {
+                id: 3,
+                name: "Test Server " + Math.floor(Math.random() * 101),
+                ip: "127.0.0.1",
+                port: 55920,
+                loadPercentage: 0.3,
+              },
+              {
+                id: 4,
+                name: "Test Server " + Math.floor(Math.random() * 101),
+                ip: "127.0.0.1",
+                port: 55921,
+                loadPercentage: 0.2,
+              }
+            ],
+          }
+        ],
       }).finish(),
     }).finish();
     ws.send(response);
