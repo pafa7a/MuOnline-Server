@@ -18,7 +18,6 @@ const Init: IHandler = {
       }
       interval = setInterval(() => {
         sendInfo();
-        console.log(`Date: ${new Date().toISOString()}`);
       }, 60000);
     }
   },

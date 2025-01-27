@@ -29,7 +29,7 @@ export const initWebSocketServer = () => {
   wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
     const originalSend = ws.send;
     ws.send = function (data: any, ...args: any[]) {
-      console.log(`S->C: ${Wrapper.decode(data).type}`);
+      console.log(`GS->C: ${Wrapper.decode(data).type}`);
       const options = args[0] || {};
       const cb = args[1] || (() => { });
       originalSend.apply(this, [data, options, cb]);
@@ -61,7 +61,7 @@ export const initWebSocketServer = () => {
           return;
         }
 
-        console.log(`C->S: ${type}`);
+        console.log(`C->GS: ${type}`);
 
         const handler = handlers[type];
         if (handler && typeof handler.handle === "function" && payload) {

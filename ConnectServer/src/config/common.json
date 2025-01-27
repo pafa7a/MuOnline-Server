@@ -1,4 +1,12 @@
 {
   "port": 44405,
-  "internalPort": 44406
+  "internalPort": 44406,
+  "serverGroups": [
+    {
+      "name": "Server group"
+    },
+    {
+      "name": "Server group2"
+    }
+  ]
 }

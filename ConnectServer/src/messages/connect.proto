@@ -12,7 +12,7 @@ message ServerInfo {
   string ip = 2;
   int32 port = 3;
   int32 id = 4;
-  float loadPercentage = 5;
+  string loadPercentage = 5;
 }
 
 message ServerGroupInfo {

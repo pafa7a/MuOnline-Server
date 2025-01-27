@@ -19,7 +19,7 @@ export interface ServerInfo {
   ip: string;
   port: number;
   id: number;
-  loadPercentage: number;
+  loadPercentage: string;
 }
 
 export interface ServerGroupInfo {
@@ -108,7 +108,7 @@ export const Wrapper: MessageFns<Wrapper> = {
 };
 
 function createBaseServerInfo(): ServerInfo {
-  return { name: "", ip: "", port: 0, id: 0, loadPercentage: 0 };
+  return { name: "", ip: "", port: 0, id: 0, loadPercentage: "" };
 }
 
 export const ServerInfo: MessageFns<ServerInfo> = {
@@ -125,8 +125,8 @@ export const ServerInfo: MessageFns<ServerInfo> = {
     if (message.id !== 0) {
       writer.uint32(32).int32(message.id);
     }
-    if (message.loadPercentage !== 0) {
-      writer.uint32(45).float(message.loadPercentage);
+    if (message.loadPercentage !== "") {
+      writer.uint32(42).string(message.loadPercentage);
     }
     return writer;
   },
@@ -171,11 +171,11 @@ export const ServerInfo: MessageFns<ServerInfo> = {
           continue;
         }
         case 5: {
-          if (tag !== 45) {
+          if (tag !== 42) {
             break;
           }
 
-          message.loadPercentage = reader.float();
+          message.loadPercentage = reader.string();
           continue;
         }
       }
@@ -193,7 +193,7 @@ export const ServerInfo: MessageFns<ServerInfo> = {
       ip: isSet(object.ip) ? globalThis.String(object.ip) : "",
       port: isSet(object.port) ? globalThis.Number(object.port) : 0,
       id: isSet(object.id) ? globalThis.Number(object.id) : 0,
-      loadPercentage: isSet(object.loadPercentage) ? globalThis.Number(object.loadPercentage) : 0,
+      loadPercentage: isSet(object.loadPercentage) ? globalThis.String(object.loadPercentage) : "",
     };
   },
 
@@ -211,7 +211,7 @@ export const ServerInfo: MessageFns<ServerInfo> = {
     if (message.id !== 0) {
       obj.id = Math.round(message.id);
     }
-    if (message.loadPercentage !== 0) {
+    if (message.loadPercentage !== "") {
       obj.loadPercentage = message.loadPercentage;
     }
     return obj;
@@ -226,7 +226,7 @@ export const ServerInfo: MessageFns<ServerInfo> = {
     message.ip = object.ip ?? "";
     message.port = object.port ?? 0;
     message.id = object.id ?? 0;
-    message.loadPercentage = object.loadPercentage ?? 0;
+    message.loadPercentage = object.loadPercentage ?? "";
     return message;
   },
 };

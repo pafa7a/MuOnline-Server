@@ -7,5 +7,5 @@ message Wrapper {
 
 message GameServerInfo {
   int32 onlinePlayers = 1;
-  float loadPercentage = 2;
+  string loadPercentage = 2;
 }

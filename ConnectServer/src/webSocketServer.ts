@@ -1,10 +1,9 @@
-import path from "path";
-import fs from "fs";
 import WebSocket, { WebSocketServer } from "ws";
 import { Wrapper } from "@/messages/connect";
 import { IncomingMessage } from "http";
 import { getConnectedPlayerOSType, getConnectedPlayerOSVersion } from "@/helpers/connectHelpers";
 import { getConfig } from "@/helpers/configHelpers";
+import { getAllHandlers } from "@/helpers/getAllHandlers";
 
 interface ConnectedClient {
   ws: WebSocket;
@@ -20,6 +19,8 @@ interface ConnectedInternalClient {
   port: Number;
   group: Number;
   IP: String;
+  loadPercentage?: String;
+  onlinePlayers?: Number;
 }
 
 interface ExtendedWebSocketServer extends WebSocketServer {
@@ -70,7 +71,7 @@ const createWebSocketServer = (port: number, clients: Set<ConnectedClient> | Map
         name: req?.headers['x-server-name']?.toString() || "",
         port: Number(req?.headers['x-server-port']) || 0,
         group: Number(req?.headers['x-server-group']) || 0,
-        IP: req.socket.remoteAddress || "",
+        IP: req?.socket?.remoteAddress?.replace('::ffff:', '') || "",
       };
       (clients as Map<Number, ConnectedInternalClient>).set(id, connectedClient);
 
@@ -99,7 +100,8 @@ const createWebSocketServer = (port: number, clients: Set<ConnectedClient> | Map
 
         const handler = handlers[type];
         if (handler && typeof handler.handle === "function" && payload) {
-          handler.handle(ws, payload);
+          const requestHeaders = req?.headers;
+          handler.handle(ws, payload, requestHeaders);
         } else {
           console.error(`No handler found for type: ${type}`);
         }
@@ -136,23 +138,4 @@ export const initWebSocketServer = () => {
 
   externalWss = createWebSocketServer(EXTERNAL_PORT, externalClients, 'external');
   internalWss = createWebSocketServer(INTERNAL_PORT, internalClients, 'internal');
-};
-
-const getAllHandlers = () => {
-  const handlersDir = path.join(__dirname, "handlers");
-
-  interface Handler {
-    type: string;
-    handle: (ws: WebSocket, payload: Uint8Array) => void;
-  }
-
-  const handlers: { [key: string]: Handler } = {};
-
-  fs.readdirSync(handlersDir).forEach((file) => {
-    const handler: Handler = require(path.join(handlersDir, file)).default;
-    if (handler?.type) {
-      handlers[handler.type] = handler;
-    }
-  });
-  return handlers;
 };

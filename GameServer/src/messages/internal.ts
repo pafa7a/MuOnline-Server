@@ -16,7 +16,7 @@ export interface Wrapper {
 
 export interface GameServerInfo {
   onlinePlayers: number;
-  loadPercentage: number;
+  loadPercentage: string;
 }
 
 function createBaseWrapper(): Wrapper {
@@ -96,7 +96,7 @@ export const Wrapper: MessageFns<Wrapper> = {
 };
 
 function createBaseGameServerInfo(): GameServerInfo {
-  return { onlinePlayers: 0, loadPercentage: 0 };
+  return { onlinePlayers: 0, loadPercentage: "" };
 }
 
 export const GameServerInfo: MessageFns<GameServerInfo> = {
@@ -104,8 +104,8 @@ export const GameServerInfo: MessageFns<GameServerInfo> = {
     if (message.onlinePlayers !== 0) {
       writer.uint32(8).int32(message.onlinePlayers);
     }
-    if (message.loadPercentage !== 0) {
-      writer.uint32(21).float(message.loadPercentage);
+    if (message.loadPercentage !== "") {
+      writer.uint32(18).string(message.loadPercentage);
     }
     return writer;
   },
@@ -126,11 +126,11 @@ export const GameServerInfo: MessageFns<GameServerInfo> = {
           continue;
         }
         case 2: {
-          if (tag !== 21) {
+          if (tag !== 18) {
             break;
           }
 
-          message.loadPercentage = reader.float();
+          message.loadPercentage = reader.string();
           continue;
         }
       }
@@ -145,7 +145,7 @@ export const GameServerInfo: MessageFns<GameServerInfo> = {
   fromJSON(object: any): GameServerInfo {
     return {
       onlinePlayers: isSet(object.onlinePlayers) ? globalThis.Number(object.onlinePlayers) : 0,
-      loadPercentage: isSet(object.loadPercentage) ? globalThis.Number(object.loadPercentage) : 0,
+      loadPercentage: isSet(object.loadPercentage) ? globalThis.String(object.loadPercentage) : "",
     };
   },
 
@@ -154,7 +154,7 @@ export const GameServerInfo: MessageFns<GameServerInfo> = {
     if (message.onlinePlayers !== 0) {
       obj.onlinePlayers = Math.round(message.onlinePlayers);
     }
-    if (message.loadPercentage !== 0) {
+    if (message.loadPercentage !== "") {
       obj.loadPercentage = message.loadPercentage;
     }
     return obj;
@@ -166,7 +166,7 @@ export const GameServerInfo: MessageFns<GameServerInfo> = {
   fromPartial<I extends Exact<DeepPartial<GameServerInfo>, I>>(object: I): GameServerInfo {
     const message = createBaseGameServerInfo();
     message.onlinePlayers = object.onlinePlayers ?? 0;
-    message.loadPercentage = object.loadPercentage ?? 0;
+    message.loadPercentage = object.loadPercentage ?? "";
     return message;
   },
 };
