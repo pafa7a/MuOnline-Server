@@ -1,9 +1,10 @@
 import WebSocket, { WebSocketServer } from "ws";
-import { Wrapper } from "@/messages/gameserver";
+import { PlayerPositions, Wrapper, PlayerPositionData, PlayerJoined, PlayerDisconnected } from "@/messages/gameserver";
 import { IncomingMessage } from "http";
 import { getConnectedPlayerOSType, getConnectedPlayerOSVersion } from "@/helpers/connectHelpers";
 import { getConfig } from "@/helpers/configHelpers";
 import { getAllHandlers } from "@/helpers/getAllHandlers";
+import { randomBytes } from "crypto";
 
 interface ConnectedClient {
   ws: WebSocket;
@@ -13,10 +14,21 @@ interface ConnectedClient {
   osVersion: String;
 }
 
+interface PlayerState {
+  id: string;
+  position: { x: number; y: number; z: number };
+  rotation: { x: number; y: number; z: number };
+  connectedClient: ConnectedClient;
+}
+
 export const connectedClients = new Set<ConnectedClient>();
+export const playerStates: Map<string, PlayerState> = new Map();
+export const wsToPlayerId: Map<WebSocket, string> = new Map();
+
 
 interface ExtendedWebSocketServer extends WebSocketServer {
   broadcast: (msg: Uint8Array<ArrayBufferLike>) => void;
+  broadcastExceptSender: (msg: Uint8Array<ArrayBufferLike>, sender: WebSocket) => void;
 }
 
 export let wss: ExtendedWebSocketServer;
@@ -29,10 +41,14 @@ export const initWebSocketServer = () => {
   wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
     const originalSend = ws.send;
     ws.send = function (data: any, ...args: any[]) {
-      console.log(`GS->C: ${Wrapper.decode(data).type}`);
-      const options = args[0] || {};
-      const cb = args[1] || (() => { });
-      originalSend.apply(this, [data, options, cb]);
+      try {
+        console.log(`GS->C: ${Wrapper.decode(data).type}`);
+        const options = args[0] || {};
+        const cb = args[1] || (() => { });
+        originalSend.apply(this, [data, options, cb]);
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
     };
 
     const connectedClient: ConnectedClient = {
@@ -44,14 +60,65 @@ export const initWebSocketServer = () => {
     };
     connectedClients.add(connectedClient);
 
+    function createRandomString(length: number) {
+      return randomBytes(length / 2).toString("hex");
+    }
+
+    // Initialize player state
+    const playerId = createRandomString(5);
+
+    // Map the WebSocket to the player ID
+    wsToPlayerId.set(ws, playerId);
+
+    const initialPlayerState: PlayerState = {
+      id: playerId.toString(),
+      position: { x: 125, y: 0, z: 125 },
+      rotation: { x: 0, y: 0, z: 0 },
+      connectedClient,
+    };
+
+    const otherPlayers = Array.from(playerStates.values()).map(playerState => ({
+      id: playerState.id.toString(),
+      x: playerState.position.x,
+      y: playerState.position.y,
+      z: playerState.position.z,
+      rotationX: playerState.rotation.x,
+      rotationY: playerState.rotation.y,
+      rotationZ: playerState.rotation.z,
+    }));
+
+    playerStates.set(playerId, initialPlayerState);
+
     console.log(`Client connected. IP: ${connectedClient.remoteAddress}, Port: ${connectedClient.remotePort}, OS: ${connectedClient.osType} ${connectedClient.osVersion}`);
 
-    // Send the init packet.
-    const initPacketWrapper = Wrapper.encode({
-      type: 'Init',
-      payload: new Uint8Array(),
+    const localPlayer: PlayerPositionData = {
+      id: playerId,
+      x: initialPlayerState.position.x,
+      y: initialPlayerState.position.y,
+      z: initialPlayerState.position.z,
+      rotationX: initialPlayerState.rotation.x,
+      rotationY: initialPlayerState.rotation.y,
+      rotationZ: initialPlayerState.rotation.z,
+    };
+
+    // Send information about the local player and other players to the client.
+    const playerPositionsPacket = Wrapper.encode({
+      type: 'PlayerPositions',
+      payload: PlayerPositions.encode({
+        localPlayer,
+        otherPlayers,
+      }).finish(),
     }).finish();
-    ws.send(initPacketWrapper);
+    ws.send(playerPositionsPacket);
+
+    // Broadcast the new player to all other clients.
+    const playerJoinedWrapper = Wrapper.encode({
+      type: 'PlayerJoined',
+      payload: PlayerJoined.encode({
+        newPlayer: localPlayer,
+      }).finish(),
+    }).finish();
+    wss.broadcastExceptSender(playerJoinedWrapper, ws);
 
     ws.on("message", (data) => {
       try {
@@ -77,13 +144,34 @@ export const initWebSocketServer = () => {
     ws.on("close", () => {
       console.log("Client disconnected");
       connectedClients.delete(connectedClient);
+      const playerId = wsToPlayerId.get(ws);
+      wsToPlayerId.delete(ws);
+      if (playerId) {
+        playerStates.delete(playerId);
+        const playerLeftPacket = Wrapper.encode({
+          type: 'PlayerDisconnected',
+          payload: PlayerDisconnected.encode({
+            id: playerId,
+          }).finish(),
+        }).finish();
+        wss.broadcastExceptSender(playerLeftPacket, ws);
+      }
+
     });
   });
 
   wss.broadcast = (msg) => {
     wss.clients.forEach(client => {
-      client.send(msg);
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(msg);
+      }
     });
+  };
+
+  wss.broadcastExceptSender = (msg, sender) => {
+    Array.from(wss.clients)
+      .filter(client => client !== sender && client.readyState === WebSocket.OPEN)
+      .forEach(client => client.send(msg));
   };
 
   console.log(`WebSocket server is running on ws://localhost:${PORT}`);

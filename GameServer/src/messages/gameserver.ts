@@ -14,6 +14,42 @@ export interface Wrapper {
   payload: Uint8Array;
 }
 
+export interface PlayerPositionData {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+  rotationX: number;
+  rotationY: number;
+  rotationZ: number;
+}
+
+export interface PlayerPositions {
+  localPlayer: PlayerPositionData | undefined;
+  otherPlayers: PlayerPositionData[];
+}
+
+export interface PlayerJoined {
+  newPlayer: PlayerPositionData | undefined;
+}
+
+export interface PlayerDisconnected {
+  id: string;
+}
+
+export interface WalkRequest {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface MovePlayer {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+}
+
 function createBaseWrapper(): Wrapper {
   return { type: "", payload: new Uint8Array(0) };
 }
@@ -86,6 +122,560 @@ export const Wrapper: MessageFns<Wrapper> = {
     const message = createBaseWrapper();
     message.type = object.type ?? "";
     message.payload = object.payload ?? new Uint8Array(0);
+    return message;
+  },
+};
+
+function createBasePlayerPositionData(): PlayerPositionData {
+  return { id: "", x: 0, y: 0, z: 0, rotationX: 0, rotationY: 0, rotationZ: 0 };
+}
+
+export const PlayerPositionData: MessageFns<PlayerPositionData> = {
+  encode(message: PlayerPositionData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.x !== 0) {
+      writer.uint32(21).float(message.x);
+    }
+    if (message.y !== 0) {
+      writer.uint32(29).float(message.y);
+    }
+    if (message.z !== 0) {
+      writer.uint32(37).float(message.z);
+    }
+    if (message.rotationX !== 0) {
+      writer.uint32(45).float(message.rotationX);
+    }
+    if (message.rotationY !== 0) {
+      writer.uint32(53).float(message.rotationY);
+    }
+    if (message.rotationZ !== 0) {
+      writer.uint32(61).float(message.rotationZ);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PlayerPositionData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePlayerPositionData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 21) {
+            break;
+          }
+
+          message.x = reader.float();
+          continue;
+        }
+        case 3: {
+          if (tag !== 29) {
+            break;
+          }
+
+          message.y = reader.float();
+          continue;
+        }
+        case 4: {
+          if (tag !== 37) {
+            break;
+          }
+
+          message.z = reader.float();
+          continue;
+        }
+        case 5: {
+          if (tag !== 45) {
+            break;
+          }
+
+          message.rotationX = reader.float();
+          continue;
+        }
+        case 6: {
+          if (tag !== 53) {
+            break;
+          }
+
+          message.rotationY = reader.float();
+          continue;
+        }
+        case 7: {
+          if (tag !== 61) {
+            break;
+          }
+
+          message.rotationZ = reader.float();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PlayerPositionData {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      x: isSet(object.x) ? globalThis.Number(object.x) : 0,
+      y: isSet(object.y) ? globalThis.Number(object.y) : 0,
+      z: isSet(object.z) ? globalThis.Number(object.z) : 0,
+      rotationX: isSet(object.rotationX) ? globalThis.Number(object.rotationX) : 0,
+      rotationY: isSet(object.rotationY) ? globalThis.Number(object.rotationY) : 0,
+      rotationZ: isSet(object.rotationZ) ? globalThis.Number(object.rotationZ) : 0,
+    };
+  },
+
+  toJSON(message: PlayerPositionData): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.x !== 0) {
+      obj.x = message.x;
+    }
+    if (message.y !== 0) {
+      obj.y = message.y;
+    }
+    if (message.z !== 0) {
+      obj.z = message.z;
+    }
+    if (message.rotationX !== 0) {
+      obj.rotationX = message.rotationX;
+    }
+    if (message.rotationY !== 0) {
+      obj.rotationY = message.rotationY;
+    }
+    if (message.rotationZ !== 0) {
+      obj.rotationZ = message.rotationZ;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PlayerPositionData>, I>>(base?: I): PlayerPositionData {
+    return PlayerPositionData.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PlayerPositionData>, I>>(object: I): PlayerPositionData {
+    const message = createBasePlayerPositionData();
+    message.id = object.id ?? "";
+    message.x = object.x ?? 0;
+    message.y = object.y ?? 0;
+    message.z = object.z ?? 0;
+    message.rotationX = object.rotationX ?? 0;
+    message.rotationY = object.rotationY ?? 0;
+    message.rotationZ = object.rotationZ ?? 0;
+    return message;
+  },
+};
+
+function createBasePlayerPositions(): PlayerPositions {
+  return { localPlayer: undefined, otherPlayers: [] };
+}
+
+export const PlayerPositions: MessageFns<PlayerPositions> = {
+  encode(message: PlayerPositions, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.localPlayer !== undefined) {
+      PlayerPositionData.encode(message.localPlayer, writer.uint32(10).fork()).join();
+    }
+    for (const v of message.otherPlayers) {
+      PlayerPositionData.encode(v!, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PlayerPositions {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePlayerPositions();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.localPlayer = PlayerPositionData.decode(reader, reader.uint32());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.otherPlayers.push(PlayerPositionData.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PlayerPositions {
+    return {
+      localPlayer: isSet(object.localPlayer) ? PlayerPositionData.fromJSON(object.localPlayer) : undefined,
+      otherPlayers: globalThis.Array.isArray(object?.otherPlayers)
+        ? object.otherPlayers.map((e: any) => PlayerPositionData.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: PlayerPositions): unknown {
+    const obj: any = {};
+    if (message.localPlayer !== undefined) {
+      obj.localPlayer = PlayerPositionData.toJSON(message.localPlayer);
+    }
+    if (message.otherPlayers?.length) {
+      obj.otherPlayers = message.otherPlayers.map((e) => PlayerPositionData.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PlayerPositions>, I>>(base?: I): PlayerPositions {
+    return PlayerPositions.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PlayerPositions>, I>>(object: I): PlayerPositions {
+    const message = createBasePlayerPositions();
+    message.localPlayer = (object.localPlayer !== undefined && object.localPlayer !== null)
+      ? PlayerPositionData.fromPartial(object.localPlayer)
+      : undefined;
+    message.otherPlayers = object.otherPlayers?.map((e) => PlayerPositionData.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBasePlayerJoined(): PlayerJoined {
+  return { newPlayer: undefined };
+}
+
+export const PlayerJoined: MessageFns<PlayerJoined> = {
+  encode(message: PlayerJoined, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.newPlayer !== undefined) {
+      PlayerPositionData.encode(message.newPlayer, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PlayerJoined {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePlayerJoined();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.newPlayer = PlayerPositionData.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PlayerJoined {
+    return { newPlayer: isSet(object.newPlayer) ? PlayerPositionData.fromJSON(object.newPlayer) : undefined };
+  },
+
+  toJSON(message: PlayerJoined): unknown {
+    const obj: any = {};
+    if (message.newPlayer !== undefined) {
+      obj.newPlayer = PlayerPositionData.toJSON(message.newPlayer);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PlayerJoined>, I>>(base?: I): PlayerJoined {
+    return PlayerJoined.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PlayerJoined>, I>>(object: I): PlayerJoined {
+    const message = createBasePlayerJoined();
+    message.newPlayer = (object.newPlayer !== undefined && object.newPlayer !== null)
+      ? PlayerPositionData.fromPartial(object.newPlayer)
+      : undefined;
+    return message;
+  },
+};
+
+function createBasePlayerDisconnected(): PlayerDisconnected {
+  return { id: "" };
+}
+
+export const PlayerDisconnected: MessageFns<PlayerDisconnected> = {
+  encode(message: PlayerDisconnected, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PlayerDisconnected {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePlayerDisconnected();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PlayerDisconnected {
+    return { id: isSet(object.id) ? globalThis.String(object.id) : "" };
+  },
+
+  toJSON(message: PlayerDisconnected): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PlayerDisconnected>, I>>(base?: I): PlayerDisconnected {
+    return PlayerDisconnected.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PlayerDisconnected>, I>>(object: I): PlayerDisconnected {
+    const message = createBasePlayerDisconnected();
+    message.id = object.id ?? "";
+    return message;
+  },
+};
+
+function createBaseWalkRequest(): WalkRequest {
+  return { x: 0, y: 0, z: 0 };
+}
+
+export const WalkRequest: MessageFns<WalkRequest> = {
+  encode(message: WalkRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.x !== 0) {
+      writer.uint32(13).float(message.x);
+    }
+    if (message.y !== 0) {
+      writer.uint32(21).float(message.y);
+    }
+    if (message.z !== 0) {
+      writer.uint32(29).float(message.z);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): WalkRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWalkRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 13) {
+            break;
+          }
+
+          message.x = reader.float();
+          continue;
+        }
+        case 2: {
+          if (tag !== 21) {
+            break;
+          }
+
+          message.y = reader.float();
+          continue;
+        }
+        case 3: {
+          if (tag !== 29) {
+            break;
+          }
+
+          message.z = reader.float();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WalkRequest {
+    return {
+      x: isSet(object.x) ? globalThis.Number(object.x) : 0,
+      y: isSet(object.y) ? globalThis.Number(object.y) : 0,
+      z: isSet(object.z) ? globalThis.Number(object.z) : 0,
+    };
+  },
+
+  toJSON(message: WalkRequest): unknown {
+    const obj: any = {};
+    if (message.x !== 0) {
+      obj.x = message.x;
+    }
+    if (message.y !== 0) {
+      obj.y = message.y;
+    }
+    if (message.z !== 0) {
+      obj.z = message.z;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<WalkRequest>, I>>(base?: I): WalkRequest {
+    return WalkRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<WalkRequest>, I>>(object: I): WalkRequest {
+    const message = createBaseWalkRequest();
+    message.x = object.x ?? 0;
+    message.y = object.y ?? 0;
+    message.z = object.z ?? 0;
+    return message;
+  },
+};
+
+function createBaseMovePlayer(): MovePlayer {
+  return { id: "", x: 0, y: 0, z: 0 };
+}
+
+export const MovePlayer: MessageFns<MovePlayer> = {
+  encode(message: MovePlayer, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.x !== 0) {
+      writer.uint32(21).float(message.x);
+    }
+    if (message.y !== 0) {
+      writer.uint32(29).float(message.y);
+    }
+    if (message.z !== 0) {
+      writer.uint32(37).float(message.z);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MovePlayer {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMovePlayer();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 21) {
+            break;
+          }
+
+          message.x = reader.float();
+          continue;
+        }
+        case 3: {
+          if (tag !== 29) {
+            break;
+          }
+
+          message.y = reader.float();
+          continue;
+        }
+        case 4: {
+          if (tag !== 37) {
+            break;
+          }
+
+          message.z = reader.float();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MovePlayer {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      x: isSet(object.x) ? globalThis.Number(object.x) : 0,
+      y: isSet(object.y) ? globalThis.Number(object.y) : 0,
+      z: isSet(object.z) ? globalThis.Number(object.z) : 0,
+    };
+  },
+
+  toJSON(message: MovePlayer): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.x !== 0) {
+      obj.x = message.x;
+    }
+    if (message.y !== 0) {
+      obj.y = message.y;
+    }
+    if (message.z !== 0) {
+      obj.z = message.z;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MovePlayer>, I>>(base?: I): MovePlayer {
+    return MovePlayer.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MovePlayer>, I>>(object: I): MovePlayer {
+    const message = createBaseMovePlayer();
+    message.id = object.id ?? "";
+    message.x = object.x ?? 0;
+    message.y = object.y ?? 0;
+    message.z = object.z ?? 0;
     return message;
   },
 };
