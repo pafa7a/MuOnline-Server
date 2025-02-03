@@ -18,6 +18,7 @@ interface PlayerState {
   id: string;
   position: { x: number; y: number; z: number };
   rotation: { x: number; y: number; z: number };
+  isInWorld: Boolean;
   connectedClient: ConnectedClient;
 }
 
@@ -74,23 +75,27 @@ export const initWebSocketServer = () => {
       id: playerId.toString(),
       position: { x: 125, y: 0, z: 125 },
       rotation: { x: 0, y: 0, z: 0 },
+      isInWorld: false,
       connectedClient,
     };
 
-    const otherPlayers = Array.from(playerStates.values()).map(playerState => ({
-      id: playerState.id.toString(),
-      x: playerState.position.x,
-      y: playerState.position.y,
-      z: playerState.position.z,
-      rotationX: playerState.rotation.x,
-      rotationY: playerState.rotation.y,
-      rotationZ: playerState.rotation.z,
-    }));
+    const otherPlayers = Array.from(playerStates.values())
+      .filter(playerState => playerState.isInWorld)
+      .map(playerState => ({
+        id: playerState.id.toString(),
+        x: playerState.position.x,
+        y: playerState.position.y,
+        z: playerState.position.z,
+        rotationX: playerState.rotation.x,
+        rotationY: playerState.rotation.y,
+        rotationZ: playerState.rotation.z,
+      }));
 
     playerStates.set(playerId, initialPlayerState);
 
     console.log(`Client connected. IP: ${connectedClient.remoteAddress}, Port: ${connectedClient.remotePort}, OS: ${connectedClient.osType} ${connectedClient.osVersion}`);
 
+    //@TODO: Move below to happen when the player enters the world.
     const localPlayer: PlayerPositionData = {
       id: playerId,
       x: initialPlayerState.position.x,

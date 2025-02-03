@@ -9,6 +9,69 @@ import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 
 export const protobufPackage = "";
 
+export enum LoginResponseEnum {
+  LOGIN_OK = 0,
+  LOGIN_INVALID_CREDENTIALS = 1,
+  LOGIN_INVALID_VERSION = 2,
+  LOGIN_INVALID_SERIAL = 3,
+  LOGIN_SERVER_FULL = 4,
+  LOGIN_ALREADY_CONNECTED = 5,
+  LOGIN_TOO_MANY_ATTEMPTS = 6,
+  UNRECOGNIZED = -1,
+}
+
+export function loginResponseEnumFromJSON(object: any): LoginResponseEnum {
+  switch (object) {
+    case 0:
+    case "LOGIN_OK":
+      return LoginResponseEnum.LOGIN_OK;
+    case 1:
+    case "LOGIN_INVALID_CREDENTIALS":
+      return LoginResponseEnum.LOGIN_INVALID_CREDENTIALS;
+    case 2:
+    case "LOGIN_INVALID_VERSION":
+      return LoginResponseEnum.LOGIN_INVALID_VERSION;
+    case 3:
+    case "LOGIN_INVALID_SERIAL":
+      return LoginResponseEnum.LOGIN_INVALID_SERIAL;
+    case 4:
+    case "LOGIN_SERVER_FULL":
+      return LoginResponseEnum.LOGIN_SERVER_FULL;
+    case 5:
+    case "LOGIN_ALREADY_CONNECTED":
+      return LoginResponseEnum.LOGIN_ALREADY_CONNECTED;
+    case 6:
+    case "LOGIN_TOO_MANY_ATTEMPTS":
+      return LoginResponseEnum.LOGIN_TOO_MANY_ATTEMPTS;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return LoginResponseEnum.UNRECOGNIZED;
+  }
+}
+
+export function loginResponseEnumToJSON(object: LoginResponseEnum): string {
+  switch (object) {
+    case LoginResponseEnum.LOGIN_OK:
+      return "LOGIN_OK";
+    case LoginResponseEnum.LOGIN_INVALID_CREDENTIALS:
+      return "LOGIN_INVALID_CREDENTIALS";
+    case LoginResponseEnum.LOGIN_INVALID_VERSION:
+      return "LOGIN_INVALID_VERSION";
+    case LoginResponseEnum.LOGIN_INVALID_SERIAL:
+      return "LOGIN_INVALID_SERIAL";
+    case LoginResponseEnum.LOGIN_SERVER_FULL:
+      return "LOGIN_SERVER_FULL";
+    case LoginResponseEnum.LOGIN_ALREADY_CONNECTED:
+      return "LOGIN_ALREADY_CONNECTED";
+    case LoginResponseEnum.LOGIN_TOO_MANY_ATTEMPTS:
+      return "LOGIN_TOO_MANY_ATTEMPTS";
+    case LoginResponseEnum.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
 export interface Wrapper {
   type: string;
   payload: Uint8Array;
@@ -48,6 +111,17 @@ export interface MovePlayer {
   x: number;
   y: number;
   z: number;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+  version: string;
+  serial: string;
+}
+
+export interface LoginResponse {
+  responseCode: LoginResponseEnum;
 }
 
 function createBaseWrapper(): Wrapper {
@@ -676,6 +750,172 @@ export const MovePlayer: MessageFns<MovePlayer> = {
     message.x = object.x ?? 0;
     message.y = object.y ?? 0;
     message.z = object.z ?? 0;
+    return message;
+  },
+};
+
+function createBaseLoginRequest(): LoginRequest {
+  return { username: "", password: "", version: "", serial: "" };
+}
+
+export const LoginRequest: MessageFns<LoginRequest> = {
+  encode(message: LoginRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.username !== "") {
+      writer.uint32(10).string(message.username);
+    }
+    if (message.password !== "") {
+      writer.uint32(18).string(message.password);
+    }
+    if (message.version !== "") {
+      writer.uint32(26).string(message.version);
+    }
+    if (message.serial !== "") {
+      writer.uint32(34).string(message.serial);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): LoginRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseLoginRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.username = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.password = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.version = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.serial = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): LoginRequest {
+    return {
+      username: isSet(object.username) ? globalThis.String(object.username) : "",
+      password: isSet(object.password) ? globalThis.String(object.password) : "",
+      version: isSet(object.version) ? globalThis.String(object.version) : "",
+      serial: isSet(object.serial) ? globalThis.String(object.serial) : "",
+    };
+  },
+
+  toJSON(message: LoginRequest): unknown {
+    const obj: any = {};
+    if (message.username !== "") {
+      obj.username = message.username;
+    }
+    if (message.password !== "") {
+      obj.password = message.password;
+    }
+    if (message.version !== "") {
+      obj.version = message.version;
+    }
+    if (message.serial !== "") {
+      obj.serial = message.serial;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<LoginRequest>, I>>(base?: I): LoginRequest {
+    return LoginRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<LoginRequest>, I>>(object: I): LoginRequest {
+    const message = createBaseLoginRequest();
+    message.username = object.username ?? "";
+    message.password = object.password ?? "";
+    message.version = object.version ?? "";
+    message.serial = object.serial ?? "";
+    return message;
+  },
+};
+
+function createBaseLoginResponse(): LoginResponse {
+  return { responseCode: 0 };
+}
+
+export const LoginResponse: MessageFns<LoginResponse> = {
+  encode(message: LoginResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.responseCode !== 0) {
+      writer.uint32(8).int32(message.responseCode);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): LoginResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseLoginResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.responseCode = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): LoginResponse {
+    return { responseCode: isSet(object.responseCode) ? loginResponseEnumFromJSON(object.responseCode) : 0 };
+  },
+
+  toJSON(message: LoginResponse): unknown {
+    const obj: any = {};
+    if (message.responseCode !== 0) {
+      obj.responseCode = loginResponseEnumToJSON(message.responseCode);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<LoginResponse>, I>>(base?: I): LoginResponse {
+    return LoginResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<LoginResponse>, I>>(object: I): LoginResponse {
+    const message = createBaseLoginResponse();
+    message.responseCode = object.responseCode ?? 0;
     return message;
   },
 };

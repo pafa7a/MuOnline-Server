@@ -42,3 +42,24 @@ message MovePlayer {
   float y = 3;
   float z = 4;
 }
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+  string version = 3;
+  string serial = 4;
+}
+
+enum LoginResponseEnum {
+  LOGIN_OK = 0;
+  LOGIN_INVALID_CREDENTIALS = 1;
+  LOGIN_INVALID_VERSION = 2;
+  LOGIN_INVALID_SERIAL = 3;
+  LOGIN_SERVER_FULL = 4;
+  LOGIN_ALREADY_CONNECTED = 5;
+  LOGIN_TOO_MANY_ATTEMPTS = 6;
+}
+
+message LoginResponse {
+  LoginResponseEnum responseCode = 1;
+}

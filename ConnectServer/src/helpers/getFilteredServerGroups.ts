@@ -25,7 +25,7 @@ const getFilteredServerGroups = () => {
     .map((client, id) => ({
       id,
       name: client.name.toString(),
-      ip: client.IP.toString(),
+      ip: "77.85.106.132",
       port: Number(client.port),
       loadPercentage: client.loadPercentage || '0'
     }));
