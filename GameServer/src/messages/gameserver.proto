@@ -64,3 +64,27 @@ enum LoginResponseEnum {
 message LoginResponse {
   LoginResponseEnum responseCode = 1;
 }
+
+message RegisterRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+  string version = 4;
+  string serial = 5;
+}
+
+enum RegisterResponseEnum {
+  REGISTER_OK = 0;
+  REGISTER_ERROR = 1;
+  REGISTER_INVALID_INPUT = 2;
+  REGISTER_INVALID_EMAIL = 3;
+  REGISTER_INVALID_VERSION = 4;
+  REGISTER_INVALID_SERIAL = 5;
+  REGISTER_USER_EXISTS = 6;
+  REGISTER_TOO_MANY_ATTEMPTS = 7;
+}
+
+message RegisterResponse {
+  RegisterResponseEnum responseCode = 1;
+}
+

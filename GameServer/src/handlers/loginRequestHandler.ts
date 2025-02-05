@@ -5,7 +5,7 @@ import { WebSocket } from "ws";
 import { AppDataSource } from "@/helpers/databaseConnection";
 import { User } from "@/database/entities/User";
 import { createHash } from "crypto";
-import { connectedClients } from "@/webSocketServer";
+import { connectedClients, wsToUserId } from "@/webSocketServer";
 
 const hashPassword = (password: string): string => {
   return createHash('sha512').update(password).digest('hex');
@@ -33,17 +33,16 @@ const validateInputLengths = (username: string, password: string): boolean => {
     password.length <= 16;
 };
 
-const MAX_ATTEMPTS = 3;
-
 const checkLoginAttempts = (ws: WebSocket): boolean => {
   const client = Array.from(connectedClients).find(c => c.ws === ws);
   if (!client) return false;
 
-  if (client.loginAttempts >= MAX_ATTEMPTS) {
+  const maxAttempts = getConfig('common', 'maxAttempts');
+  if (client.failedAttempts >= maxAttempts) {
     return false;
   }
 
-  client.loginAttempts++;
+  client.failedAttempts++;
   return true;
 };
 
@@ -79,15 +78,17 @@ const RequestServerList: IHandler = {
       return loginResponse(ws, LoginResponseEnum.LOGIN_INVALID_CREDENTIALS);
     }
 
-    // Reset attempts on successful login
-    const client = Array.from(connectedClients).find(c => c.ws === ws);
-    if (client) {
-      client.loginAttempts = 0;
-    }
-
     // Check if user is banned
     if (isBanned(user)) {
       return loginResponse(ws, LoginResponseEnum.LOGIN_BANNED);
+    }
+
+    // Reset attempts on successful login and store userId
+    const client = Array.from(connectedClients).find(c => c.ws === ws);
+    if (client) {
+      client.failedAttempts = 0;
+      client.userId = user.id;
+      wsToUserId.set(ws, user.id);
     }
 
     return loginResponse(ws, LoginResponseEnum.LOGIN_OK);

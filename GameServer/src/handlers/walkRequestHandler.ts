@@ -1,16 +1,16 @@
 import { MovePlayer, WalkRequest, Wrapper } from "@/messages/gameserver";
 import { IHandler } from "./types";
-import { playerStates, wss, wsToPlayerId } from "@/webSocketServer";
+import { playerStates, wss, wsToUserId } from "@/webSocketServer";
 
 const WalkRequestHandler: IHandler = {
   type: "WalkRequest",
   handle: (ws, payload) => {
     const data = WalkRequest.decode(payload);
-    const playerId = wsToPlayerId.get(ws);
-    if (!playerId) {
+    const userId = wsToUserId.get(ws);
+    if (!userId) {
       return;
     }
-    const playerState = playerStates.get(playerId);
+    const playerState = playerStates.get(userId);
     if (!playerState) {
       return;
     }
@@ -24,7 +24,7 @@ const WalkRequestHandler: IHandler = {
     const message = Wrapper.encode({
       type: "MovePlayer",
       payload: MovePlayer.encode({
-        id: playerId,
+        id: userId.toString(),
         x: newPlayerPosition.x,
         y: newPlayerPosition.y,
         z: newPlayerPosition.z,

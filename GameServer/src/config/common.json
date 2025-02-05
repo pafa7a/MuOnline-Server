@@ -6,6 +6,7 @@
   "version": "10000",
   "serial": "dxYpAToAtiQRsDjQGdjG",
   "maxPlayers": 100,
+  "maxAttempts": 3,
   "connectServerAddress": "127.0.0.1",
   "connectServerPort": 44406
 }

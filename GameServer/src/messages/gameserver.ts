@@ -78,6 +78,75 @@ export function loginResponseEnumToJSON(object: LoginResponseEnum): string {
   }
 }
 
+export enum RegisterResponseEnum {
+  REGISTER_OK = 0,
+  REGISTER_ERROR = 1,
+  REGISTER_INVALID_INPUT = 2,
+  REGISTER_INVALID_EMAIL = 3,
+  REGISTER_INVALID_VERSION = 4,
+  REGISTER_INVALID_SERIAL = 5,
+  REGISTER_USER_EXISTS = 6,
+  REGISTER_TOO_MANY_ATTEMPTS = 7,
+  UNRECOGNIZED = -1,
+}
+
+export function registerResponseEnumFromJSON(object: any): RegisterResponseEnum {
+  switch (object) {
+    case 0:
+    case "REGISTER_OK":
+      return RegisterResponseEnum.REGISTER_OK;
+    case 1:
+    case "REGISTER_ERROR":
+      return RegisterResponseEnum.REGISTER_ERROR;
+    case 2:
+    case "REGISTER_INVALID_INPUT":
+      return RegisterResponseEnum.REGISTER_INVALID_INPUT;
+    case 3:
+    case "REGISTER_INVALID_EMAIL":
+      return RegisterResponseEnum.REGISTER_INVALID_EMAIL;
+    case 4:
+    case "REGISTER_INVALID_VERSION":
+      return RegisterResponseEnum.REGISTER_INVALID_VERSION;
+    case 5:
+    case "REGISTER_INVALID_SERIAL":
+      return RegisterResponseEnum.REGISTER_INVALID_SERIAL;
+    case 6:
+    case "REGISTER_USER_EXISTS":
+      return RegisterResponseEnum.REGISTER_USER_EXISTS;
+    case 7:
+    case "REGISTER_TOO_MANY_ATTEMPTS":
+      return RegisterResponseEnum.REGISTER_TOO_MANY_ATTEMPTS;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return RegisterResponseEnum.UNRECOGNIZED;
+  }
+}
+
+export function registerResponseEnumToJSON(object: RegisterResponseEnum): string {
+  switch (object) {
+    case RegisterResponseEnum.REGISTER_OK:
+      return "REGISTER_OK";
+    case RegisterResponseEnum.REGISTER_ERROR:
+      return "REGISTER_ERROR";
+    case RegisterResponseEnum.REGISTER_INVALID_INPUT:
+      return "REGISTER_INVALID_INPUT";
+    case RegisterResponseEnum.REGISTER_INVALID_EMAIL:
+      return "REGISTER_INVALID_EMAIL";
+    case RegisterResponseEnum.REGISTER_INVALID_VERSION:
+      return "REGISTER_INVALID_VERSION";
+    case RegisterResponseEnum.REGISTER_INVALID_SERIAL:
+      return "REGISTER_INVALID_SERIAL";
+    case RegisterResponseEnum.REGISTER_USER_EXISTS:
+      return "REGISTER_USER_EXISTS";
+    case RegisterResponseEnum.REGISTER_TOO_MANY_ATTEMPTS:
+      return "REGISTER_TOO_MANY_ATTEMPTS";
+    case RegisterResponseEnum.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
 export interface Wrapper {
   type: string;
   payload: Uint8Array;
@@ -128,6 +197,18 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   responseCode: LoginResponseEnum;
+}
+
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  version: string;
+  serial: string;
+}
+
+export interface RegisterResponse {
+  responseCode: RegisterResponseEnum;
 }
 
 function createBaseWrapper(): Wrapper {
@@ -921,6 +1002,188 @@ export const LoginResponse: MessageFns<LoginResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<LoginResponse>, I>>(object: I): LoginResponse {
     const message = createBaseLoginResponse();
+    message.responseCode = object.responseCode ?? 0;
+    return message;
+  },
+};
+
+function createBaseRegisterRequest(): RegisterRequest {
+  return { username: "", email: "", password: "", version: "", serial: "" };
+}
+
+export const RegisterRequest: MessageFns<RegisterRequest> = {
+  encode(message: RegisterRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.username !== "") {
+      writer.uint32(10).string(message.username);
+    }
+    if (message.email !== "") {
+      writer.uint32(18).string(message.email);
+    }
+    if (message.password !== "") {
+      writer.uint32(26).string(message.password);
+    }
+    if (message.version !== "") {
+      writer.uint32(34).string(message.version);
+    }
+    if (message.serial !== "") {
+      writer.uint32(42).string(message.serial);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RegisterRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRegisterRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.username = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.password = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.version = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.serial = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RegisterRequest {
+    return {
+      username: isSet(object.username) ? globalThis.String(object.username) : "",
+      email: isSet(object.email) ? globalThis.String(object.email) : "",
+      password: isSet(object.password) ? globalThis.String(object.password) : "",
+      version: isSet(object.version) ? globalThis.String(object.version) : "",
+      serial: isSet(object.serial) ? globalThis.String(object.serial) : "",
+    };
+  },
+
+  toJSON(message: RegisterRequest): unknown {
+    const obj: any = {};
+    if (message.username !== "") {
+      obj.username = message.username;
+    }
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    if (message.password !== "") {
+      obj.password = message.password;
+    }
+    if (message.version !== "") {
+      obj.version = message.version;
+    }
+    if (message.serial !== "") {
+      obj.serial = message.serial;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RegisterRequest>, I>>(base?: I): RegisterRequest {
+    return RegisterRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RegisterRequest>, I>>(object: I): RegisterRequest {
+    const message = createBaseRegisterRequest();
+    message.username = object.username ?? "";
+    message.email = object.email ?? "";
+    message.password = object.password ?? "";
+    message.version = object.version ?? "";
+    message.serial = object.serial ?? "";
+    return message;
+  },
+};
+
+function createBaseRegisterResponse(): RegisterResponse {
+  return { responseCode: 0 };
+}
+
+export const RegisterResponse: MessageFns<RegisterResponse> = {
+  encode(message: RegisterResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.responseCode !== 0) {
+      writer.uint32(8).int32(message.responseCode);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RegisterResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRegisterResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.responseCode = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RegisterResponse {
+    return { responseCode: isSet(object.responseCode) ? registerResponseEnumFromJSON(object.responseCode) : 0 };
+  },
+
+  toJSON(message: RegisterResponse): unknown {
+    const obj: any = {};
+    if (message.responseCode !== 0) {
+      obj.responseCode = registerResponseEnumToJSON(message.responseCode);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RegisterResponse>, I>>(base?: I): RegisterResponse {
+    return RegisterResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RegisterResponse>, I>>(object: I): RegisterResponse {
+    const message = createBaseRegisterResponse();
     message.responseCode = object.responseCode ?? 0;
     return message;
   },

@@ -1,10 +1,9 @@
 import WebSocket, { WebSocketServer } from "ws";
-import { PlayerPositions, Wrapper, PlayerPositionData, PlayerJoined, PlayerDisconnected } from "@/messages/gameserver";
+import { Wrapper, PlayerDisconnected } from "@/messages/gameserver";
 import { IncomingMessage } from "http";
 import { getConnectedPlayerOSType, getConnectedPlayerOSVersion } from "@/helpers/connectHelpers";
 import { getConfig } from "@/helpers/configHelpers";
 import { getAllHandlers } from "@/helpers/getAllHandlers";
-import { randomBytes } from "crypto";
 
 interface ConnectedClient {
   ws: WebSocket;
@@ -12,11 +11,12 @@ interface ConnectedClient {
   remotePort: Number;
   osType: String;
   osVersion: String;
-  loginAttempts: number;
+  userId?: number;
+  failedAttempts: number;
 }
 
 interface PlayerState {
-  id: string;
+  id: number;
   position: { x: number; y: number; z: number };
   rotation: { x: number; y: number; z: number };
   isInWorld: Boolean;
@@ -24,8 +24,8 @@ interface PlayerState {
 }
 
 export const connectedClients = new Set<ConnectedClient>();
-export const playerStates: Map<string, PlayerState> = new Map();
-export const wsToPlayerId: Map<WebSocket, string> = new Map();
+export const playerStates: Map<number, PlayerState> = new Map();
+export const wsToUserId: Map<WebSocket, number> = new Map();
 
 
 interface ExtendedWebSocketServer extends WebSocketServer {
@@ -59,73 +59,11 @@ export const initWebSocketServer = () => {
       remotePort: req.socket.remotePort || 0,
       osType: getConnectedPlayerOSType(req.headers),
       osVersion: getConnectedPlayerOSVersion(req.headers),
-      loginAttempts: 0
+      failedAttempts: 0
     };
     connectedClients.add(connectedClient);
 
-    function createRandomString(length: number) {
-      return randomBytes(length / 2).toString("hex");
-    }
-
-    // Initialize player state
-    const playerId = createRandomString(5);
-
-    // Map the WebSocket to the player ID
-    wsToPlayerId.set(ws, playerId);
-
-    const initialPlayerState: PlayerState = {
-      id: playerId.toString(),
-      position: { x: 125, y: 0, z: 125 },
-      rotation: { x: 0, y: 0, z: 0 },
-      isInWorld: false,
-      connectedClient,
-    };
-
-    const otherPlayers = Array.from(playerStates.values())
-      .filter(playerState => playerState.isInWorld)
-      .map(playerState => ({
-        id: playerState.id.toString(),
-        x: playerState.position.x,
-        y: playerState.position.y,
-        z: playerState.position.z,
-        rotationX: playerState.rotation.x,
-        rotationY: playerState.rotation.y,
-        rotationZ: playerState.rotation.z,
-      }));
-
-    playerStates.set(playerId, initialPlayerState);
-
     console.log(`Client connected. IP: ${connectedClient.remoteAddress}, Port: ${connectedClient.remotePort}, OS: ${connectedClient.osType} ${connectedClient.osVersion}`);
-
-    //@TODO: Move below to happen when the player enters the world.
-    const localPlayer: PlayerPositionData = {
-      id: playerId,
-      x: initialPlayerState.position.x,
-      y: initialPlayerState.position.y,
-      z: initialPlayerState.position.z,
-      rotationX: initialPlayerState.rotation.x,
-      rotationY: initialPlayerState.rotation.y,
-      rotationZ: initialPlayerState.rotation.z,
-    };
-
-    // Send information about the local player and other players to the client.
-    const playerPositionsPacket = Wrapper.encode({
-      type: 'PlayerPositions',
-      payload: PlayerPositions.encode({
-        localPlayer,
-        otherPlayers,
-      }).finish(),
-    }).finish();
-    ws.send(playerPositionsPacket);
-
-    // Broadcast the new player to all other clients.
-    const playerJoinedWrapper = Wrapper.encode({
-      type: 'PlayerJoined',
-      payload: PlayerJoined.encode({
-        newPlayer: localPlayer,
-      }).finish(),
-    }).finish();
-    wss.broadcastExceptSender(playerJoinedWrapper, ws);
 
     ws.on("message", (data) => {
       try {
@@ -151,14 +89,14 @@ export const initWebSocketServer = () => {
     ws.on("close", () => {
       console.log("Client disconnected");
       connectedClients.delete(connectedClient);
-      const playerId = wsToPlayerId.get(ws);
-      wsToPlayerId.delete(ws);
-      if (playerId) {
-        playerStates.delete(playerId);
+      const userId = wsToUserId.get(ws);
+      wsToUserId.delete(ws);
+      if (userId) {
+        playerStates.delete(userId);
         const playerLeftPacket = Wrapper.encode({
           type: 'PlayerDisconnected',
           payload: PlayerDisconnected.encode({
-            id: playerId,
+            id: userId.toString(),
           }).finish(),
         }).finish();
         wss.broadcastExceptSender(playerLeftPacket, ws);
