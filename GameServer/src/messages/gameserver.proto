@@ -58,6 +58,7 @@ enum LoginResponseEnum {
   LOGIN_SERVER_FULL = 4;
   LOGIN_ALREADY_CONNECTED = 5;
   LOGIN_TOO_MANY_ATTEMPTS = 6;
+  LOGIN_BANNED = 7;
 }
 
 message LoginResponse {

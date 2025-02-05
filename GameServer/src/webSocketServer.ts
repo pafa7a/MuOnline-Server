@@ -12,6 +12,7 @@ interface ConnectedClient {
   remotePort: Number;
   osType: String;
   osVersion: String;
+  loginAttempts: number;
 }
 
 interface PlayerState {
@@ -57,7 +58,8 @@ export const initWebSocketServer = () => {
       remoteAddress: req.socket.remoteAddress || "",
       remotePort: req.socket.remotePort || 0,
       osType: getConnectedPlayerOSType(req.headers),
-      osVersion: getConnectedPlayerOSVersion(req.headers)
+      osVersion: getConnectedPlayerOSVersion(req.headers),
+      loginAttempts: 0
     };
     connectedClients.add(connectedClient);
 

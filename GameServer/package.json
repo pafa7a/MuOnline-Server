@@ -7,13 +7,21 @@
     "build": "tsc && tsc-alias",
     "postbuild": "xcopy /E /I src\\config build\\config",
     "start": "node build/index.js",
-    "compile-proto": "tsx src/scripts/compileProto.ts"
+    "compile-proto": "tsx src/scripts/compileProto.ts",
+    "typeorm": "tsx node_modules/typeorm/cli.js --dataSource ./src/helpers/databaseConnection.ts",
+    "migration:show": "npm run typeorm -- migration:show",
+    "migration:generate": "npm run typeorm -- migration:generate",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:revert": "npm run typeorm -- migration:revert"
   },
   "author": "pafa7a",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.20",
+    "reflect-metadata": "^0.2.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

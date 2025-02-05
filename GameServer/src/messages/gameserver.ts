@@ -17,6 +17,7 @@ export enum LoginResponseEnum {
   LOGIN_SERVER_FULL = 4,
   LOGIN_ALREADY_CONNECTED = 5,
   LOGIN_TOO_MANY_ATTEMPTS = 6,
+  LOGIN_BANNED = 7,
   UNRECOGNIZED = -1,
 }
 
@@ -43,6 +44,9 @@ export function loginResponseEnumFromJSON(object: any): LoginResponseEnum {
     case 6:
     case "LOGIN_TOO_MANY_ATTEMPTS":
       return LoginResponseEnum.LOGIN_TOO_MANY_ATTEMPTS;
+    case 7:
+    case "LOGIN_BANNED":
+      return LoginResponseEnum.LOGIN_BANNED;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -66,6 +70,8 @@ export function loginResponseEnumToJSON(object: LoginResponseEnum): string {
       return "LOGIN_ALREADY_CONNECTED";
     case LoginResponseEnum.LOGIN_TOO_MANY_ATTEMPTS:
       return "LOGIN_TOO_MANY_ATTEMPTS";
+    case LoginResponseEnum.LOGIN_BANNED:
+      return "LOGIN_BANNED";
     case LoginResponseEnum.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";

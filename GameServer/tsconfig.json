@@ -8,11 +8,23 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./build",
     "baseUrl": "./src",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "paths": {
-      "@/*": ["./*"],
+      "@/*": [
+        "./*"
+      ],
     }
   },
-  "include": ["src/**/*", "src/config/**/*.json"],
-  "exclude": ["node_modules", "build"]
+  "include": [
+    "src/**/*",
+    "src/config/**/*.json"
+  ],
+  "exclude": [
+    "node_modules",
+    "build"
+  ]
 }
