@@ -14,7 +14,7 @@ const WorldEnterHandler: IHandler = {
 
     const initialPlayerState = {
       id: userId,
-      position: { x: 125, y: 0, z: 125 },
+      position: { x: 133, y: 0, z: 124 },
       rotation: { x: 0, y: 0, z: 0 },
       isInWorld: true,
       connectedClient: Array.from(connectedClients)
