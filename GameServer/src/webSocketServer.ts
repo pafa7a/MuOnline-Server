@@ -4,6 +4,8 @@ import { IncomingMessage } from "http";
 import { getConnectedPlayerOSType, getConnectedPlayerOSVersion } from "@/helpers/connectHelpers";
 import { getConfig } from "@/helpers/configHelpers";
 import { getAllHandlers } from "@/helpers/getAllHandlers";
+import fs from "fs";
+import https from "https";
 
 interface ConnectedClient {
   ws: WebSocket;
@@ -27,7 +29,6 @@ export const connectedClients = new Set<ConnectedClient>();
 export const playerStates: Map<number, PlayerState> = new Map();
 export const wsToUserId: Map<WebSocket, number> = new Map();
 
-
 interface ExtendedWebSocketServer extends WebSocketServer {
   broadcast: (msg: Uint8Array<ArrayBufferLike>) => void;
   broadcastExceptSender: (msg: Uint8Array<ArrayBufferLike>, sender: WebSocket) => void;
@@ -35,10 +36,33 @@ interface ExtendedWebSocketServer extends WebSocketServer {
 
 export let wss: ExtendedWebSocketServer;
 
+// Load SSL certificate for WSS
+const sslOptions = {
+  key: fs.readFileSync("C:/Certs/server.mu.tsan.dev-key.pem"),
+  cert: fs.readFileSync("C:/Certs/server.mu.tsan.dev-crt.pem"),
+  ca: fs.readFileSync("C:/Certs/server.mu.tsan.dev-chain.pem")
+};
+
 export const initWebSocketServer = () => {
   const handlers = getAllHandlers();
   const PORT = getConfig('common', 'port');
-  wss = new WebSocketServer({ port: PORT }) as ExtendedWebSocketServer;
+  const HOSTNAME = getConfig('common', 'hostname');
+  const useWSS = getConfig('common', 'useWSS');
+
+  let server: https.Server | number;
+
+  if (useWSS) {
+    server = https.createServer(sslOptions);
+    (server as https.Server).listen(PORT, () => {
+      console.log(`GameServer WebSocket Secure (WSS) Server running on wss://${HOSTNAME}:${PORT}`);
+    });
+  }
+  else {
+    server = PORT;
+    console.log(`GameServer WebSocket Server running on ws://${HOSTNAME}:${PORT}`);
+  }
+  
+  wss = new WebSocketServer(typeof server === "number" ? { port: server } : { server }) as ExtendedWebSocketServer;
 
   wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
     const originalSend = ws.send;
@@ -118,6 +142,4 @@ export const initWebSocketServer = () => {
       .filter(client => client !== sender && client.readyState === WebSocket.OPEN)
       .forEach(client => client.send(msg));
   };
-
-  console.log(`WebSocket server is running on ws://localhost:${PORT}`);
 };

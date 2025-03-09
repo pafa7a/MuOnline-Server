@@ -17,6 +17,7 @@ interface ServerGroup {
 
 const getFilteredServerGroups = () => {
   const serverGroups = getConfig('common', 'serverGroups') as ServerGroup[];
+  const HOSTNAME = getConfig('common', 'hostname');
 
   // Add servers to server groups, based on the group index.
   serverGroups.forEach((group, groupIndex) => {
@@ -25,7 +26,7 @@ const getFilteredServerGroups = () => {
     .map((client, id) => ({
       id,
       name: client.name.toString(),
-      ip: "77.85.106.132",
+      ip: HOSTNAME,
       port: Number(client.port),
       loadPercentage: client.loadPercentage || '0'
     }));

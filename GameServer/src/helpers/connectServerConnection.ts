@@ -31,7 +31,7 @@ export const connectToConnectServer = () => {
     console.log('Connected to ConnectServer');
     const originalSend = connectServerWs?.send;
     connectServerWs.send = function (data: any, ...args: any[]) {
-      console.log(`GS->CS: ${Wrapper.decode(data).type}`);
+      console.log(`[INTERNAL] GS->CS: ${Wrapper.decode(data).type}`);
       const options = args[0] || {};
       const cb = args[1] || (() => { });
       originalSend.apply(this, [data, options, cb]);
@@ -44,7 +44,7 @@ export const connectToConnectServer = () => {
       const { type, payload } = wrapper;
       if (!type) return;
 
-      console.log(`CS->GS: ${type}`);
+      console.log(`[INTERNAL] CS->GS: ${type}`);
 
       const handler = handlers[type];
       if (connectServerWs && handler && typeof handler.handle === "function" && payload) {

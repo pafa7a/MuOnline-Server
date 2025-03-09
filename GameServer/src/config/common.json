@@ -3,6 +3,8 @@
   "serverCode": 0,
   "group": 0,
   "port": 55901,
+  "hostname": "server.mu.tsan.dev",
+  "useWSS": true,
   "version": "10000",
   "serial": "dxYpAToAtiQRsDjQGdjG",
   "maxPlayers": 100,

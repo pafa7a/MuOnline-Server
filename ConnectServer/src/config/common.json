@@ -1,5 +1,7 @@
 {
+  "hostname": "server.mu.tsan.dev",
   "port": 44405,
+  "useWSS": true,
   "internalPort": 44406,
   "serverGroups": [
     {
