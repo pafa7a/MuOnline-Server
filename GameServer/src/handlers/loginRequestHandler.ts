@@ -88,6 +88,7 @@ const RequestServerList: IHandler = {
     if (client) {
       client.failedAttempts = 0;
       client.userId = user.id;
+      client.username = user.username;
       wsToUserId.set(ws, user.id);
     }
 

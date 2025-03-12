@@ -11,9 +11,11 @@ const WorldEnterHandler: IHandler = {
       console.error("User not authenticated");
       return;
     }
+    const client = Array.from(connectedClients).find(c => c.ws === ws);
 
     const initialPlayerState = {
       id: userId,
+      username: client?.username || '',
       position: { x: 133, y: 0, z: 124 },
       rotation: { x: 0, y: 0, z: 0 },
       isInWorld: true,

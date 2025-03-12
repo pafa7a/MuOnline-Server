@@ -88,3 +88,11 @@ message RegisterResponse {
   RegisterResponseEnum responseCode = 1;
 }
 
+message PlayerSendChatMessage {
+  string message = 1;
+}
+
+message AddChatMessage {
+  string username = 1;
+  string message = 2;
+}

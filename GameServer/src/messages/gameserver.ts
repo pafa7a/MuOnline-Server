@@ -211,6 +211,15 @@ export interface RegisterResponse {
   responseCode: RegisterResponseEnum;
 }
 
+export interface PlayerSendChatMessage {
+  message: string;
+}
+
+export interface AddChatMessage {
+  username: string;
+  message: string;
+}
+
 function createBaseWrapper(): Wrapper {
   return { type: "", payload: new Uint8Array(0) };
 }
@@ -1185,6 +1194,140 @@ export const RegisterResponse: MessageFns<RegisterResponse> = {
   fromPartial<I extends Exact<DeepPartial<RegisterResponse>, I>>(object: I): RegisterResponse {
     const message = createBaseRegisterResponse();
     message.responseCode = object.responseCode ?? 0;
+    return message;
+  },
+};
+
+function createBasePlayerSendChatMessage(): PlayerSendChatMessage {
+  return { message: "" };
+}
+
+export const PlayerSendChatMessage: MessageFns<PlayerSendChatMessage> = {
+  encode(message: PlayerSendChatMessage, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.message !== "") {
+      writer.uint32(10).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PlayerSendChatMessage {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePlayerSendChatMessage();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PlayerSendChatMessage {
+    return { message: isSet(object.message) ? globalThis.String(object.message) : "" };
+  },
+
+  toJSON(message: PlayerSendChatMessage): unknown {
+    const obj: any = {};
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PlayerSendChatMessage>, I>>(base?: I): PlayerSendChatMessage {
+    return PlayerSendChatMessage.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PlayerSendChatMessage>, I>>(object: I): PlayerSendChatMessage {
+    const message = createBasePlayerSendChatMessage();
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
+function createBaseAddChatMessage(): AddChatMessage {
+  return { username: "", message: "" };
+}
+
+export const AddChatMessage: MessageFns<AddChatMessage> = {
+  encode(message: AddChatMessage, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.username !== "") {
+      writer.uint32(10).string(message.username);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddChatMessage {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddChatMessage();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.username = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AddChatMessage {
+    return {
+      username: isSet(object.username) ? globalThis.String(object.username) : "",
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: AddChatMessage): unknown {
+    const obj: any = {};
+    if (message.username !== "") {
+      obj.username = message.username;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AddChatMessage>, I>>(base?: I): AddChatMessage {
+    return AddChatMessage.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AddChatMessage>, I>>(object: I): AddChatMessage {
+    const message = createBaseAddChatMessage();
+    message.username = object.username ?? "";
+    message.message = object.message ?? "";
     return message;
   },
 };
