@@ -18,6 +18,7 @@ const PlayerSendChatMessageHandler: IHandler = {
     const message = Wrapper.encode({
       type: "AddChatMessage",
       payload: AddChatMessage.encode({
+        id: userId.toString(),
         username: playerState.username,
         message: data.message,
       }).finish(),

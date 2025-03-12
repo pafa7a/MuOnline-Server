@@ -216,6 +216,7 @@ export interface PlayerSendChatMessage {
 }
 
 export interface AddChatMessage {
+  id: string;
   username: string;
   message: string;
 }
@@ -1257,16 +1258,19 @@ export const PlayerSendChatMessage: MessageFns<PlayerSendChatMessage> = {
 };
 
 function createBaseAddChatMessage(): AddChatMessage {
-  return { username: "", message: "" };
+  return { id: "", username: "", message: "" };
 }
 
 export const AddChatMessage: MessageFns<AddChatMessage> = {
   encode(message: AddChatMessage, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
     if (message.username !== "") {
-      writer.uint32(10).string(message.username);
+      writer.uint32(18).string(message.username);
     }
     if (message.message !== "") {
-      writer.uint32(18).string(message.message);
+      writer.uint32(26).string(message.message);
     }
     return writer;
   },
@@ -1283,11 +1287,19 @@ export const AddChatMessage: MessageFns<AddChatMessage> = {
             break;
           }
 
-          message.username = reader.string();
+          message.id = reader.string();
           continue;
         }
         case 2: {
           if (tag !== 18) {
+            break;
+          }
+
+          message.username = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
             break;
           }
 
@@ -1305,6 +1317,7 @@ export const AddChatMessage: MessageFns<AddChatMessage> = {
 
   fromJSON(object: any): AddChatMessage {
     return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
       username: isSet(object.username) ? globalThis.String(object.username) : "",
       message: isSet(object.message) ? globalThis.String(object.message) : "",
     };
@@ -1312,6 +1325,9 @@ export const AddChatMessage: MessageFns<AddChatMessage> = {
 
   toJSON(message: AddChatMessage): unknown {
     const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
     if (message.username !== "") {
       obj.username = message.username;
     }
@@ -1326,6 +1342,7 @@ export const AddChatMessage: MessageFns<AddChatMessage> = {
   },
   fromPartial<I extends Exact<DeepPartial<AddChatMessage>, I>>(object: I): AddChatMessage {
     const message = createBaseAddChatMessage();
+    message.id = object.id ?? "";
     message.username = object.username ?? "";
     message.message = object.message ?? "";
     return message;
