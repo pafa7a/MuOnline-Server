@@ -7,7 +7,7 @@ message Wrapper {
   bytes payload = 2;
 }
 
-message PlayerPositionData {
+message PlayerData {
   string id = 1;
   float x = 2;
   float y = 3;
@@ -15,15 +15,16 @@ message PlayerPositionData {
   float rotationX = 5;
   float rotationY = 6;
   float rotationZ = 7;
+  string username = 8;
 }
 
-message PlayerPositions {
-  PlayerPositionData localPlayer = 1;
-  repeated PlayerPositionData otherPlayers = 2;
+message PlayersData {
+  PlayerData localPlayer = 1;
+  repeated PlayerData otherPlayers = 2;
 }
 
 message PlayerJoined {
-  PlayerPositionData newPlayer = 1;
+  PlayerData newPlayer = 1;
 }
 
 message PlayerDisconnected {

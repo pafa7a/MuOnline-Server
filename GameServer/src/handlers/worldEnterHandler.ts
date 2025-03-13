@@ -1,4 +1,4 @@
-import { Wrapper, PlayerPositions, PlayerJoined, PlayerPositionData } from "@/messages/gameserver";
+import { Wrapper, PlayerJoined, PlayerData, PlayersData } from "@/messages/gameserver";
 import { IHandler } from "./types";
 import { WebSocket } from "ws";
 import { playerStates, wsToUserId, wss, connectedClients } from "@/webSocketServer";
@@ -33,11 +33,12 @@ const WorldEnterHandler: IHandler = {
         rotationX: playerState.rotation.x,
         rotationY: playerState.rotation.y,
         rotationZ: playerState.rotation.z,
+        username: playerState.username,
       }));
 
     playerStates.set(userId, initialPlayerState);
 
-    const localPlayer: PlayerPositionData = {
+    const localPlayer: PlayerData = {
       id: userId.toString(),
       x: initialPlayerState.position.x,
       y: initialPlayerState.position.y,
@@ -45,16 +46,17 @@ const WorldEnterHandler: IHandler = {
       rotationX: initialPlayerState.rotation.x,
       rotationY: initialPlayerState.rotation.y,
       rotationZ: initialPlayerState.rotation.z,
+      username: initialPlayerState.username,
     };
 
-    const playerPositionsPacket = Wrapper.encode({
-      type: 'PlayerPositions',
-      payload: PlayerPositions.encode({
+    const playersDataPacket = Wrapper.encode({
+      type: 'PlayersData',
+      payload: PlayersData.encode({
         localPlayer,
         otherPlayers,
       }).finish(),
     }).finish();
-    ws.send(playerPositionsPacket);
+    ws.send(playersDataPacket);
 
     const playerJoinedWrapper = Wrapper.encode({
       type: 'PlayerJoined',

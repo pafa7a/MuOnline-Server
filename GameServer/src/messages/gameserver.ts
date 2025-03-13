@@ -152,7 +152,7 @@ export interface Wrapper {
   payload: Uint8Array;
 }
 
-export interface PlayerPositionData {
+export interface PlayerData {
   id: string;
   x: number;
   y: number;
@@ -160,15 +160,16 @@ export interface PlayerPositionData {
   rotationX: number;
   rotationY: number;
   rotationZ: number;
+  username: string;
 }
 
-export interface PlayerPositions {
-  localPlayer: PlayerPositionData | undefined;
-  otherPlayers: PlayerPositionData[];
+export interface PlayersData {
+  localPlayer: PlayerData | undefined;
+  otherPlayers: PlayerData[];
 }
 
 export interface PlayerJoined {
-  newPlayer: PlayerPositionData | undefined;
+  newPlayer: PlayerData | undefined;
 }
 
 export interface PlayerDisconnected {
@@ -297,12 +298,12 @@ export const Wrapper: MessageFns<Wrapper> = {
   },
 };
 
-function createBasePlayerPositionData(): PlayerPositionData {
-  return { id: "", x: 0, y: 0, z: 0, rotationX: 0, rotationY: 0, rotationZ: 0 };
+function createBasePlayerData(): PlayerData {
+  return { id: "", x: 0, y: 0, z: 0, rotationX: 0, rotationY: 0, rotationZ: 0, username: "" };
 }
 
-export const PlayerPositionData: MessageFns<PlayerPositionData> = {
-  encode(message: PlayerPositionData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const PlayerData: MessageFns<PlayerData> = {
+  encode(message: PlayerData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
@@ -324,13 +325,16 @@ export const PlayerPositionData: MessageFns<PlayerPositionData> = {
     if (message.rotationZ !== 0) {
       writer.uint32(61).float(message.rotationZ);
     }
+    if (message.username !== "") {
+      writer.uint32(66).string(message.username);
+    }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): PlayerPositionData {
+  decode(input: BinaryReader | Uint8Array, length?: number): PlayerData {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBasePlayerPositionData();
+    const message = createBasePlayerData();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -390,6 +394,14 @@ export const PlayerPositionData: MessageFns<PlayerPositionData> = {
           message.rotationZ = reader.float();
           continue;
         }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.username = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -399,7 +411,7 @@ export const PlayerPositionData: MessageFns<PlayerPositionData> = {
     return message;
   },
 
-  fromJSON(object: any): PlayerPositionData {
+  fromJSON(object: any): PlayerData {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       x: isSet(object.x) ? globalThis.Number(object.x) : 0,
@@ -408,10 +420,11 @@ export const PlayerPositionData: MessageFns<PlayerPositionData> = {
       rotationX: isSet(object.rotationX) ? globalThis.Number(object.rotationX) : 0,
       rotationY: isSet(object.rotationY) ? globalThis.Number(object.rotationY) : 0,
       rotationZ: isSet(object.rotationZ) ? globalThis.Number(object.rotationZ) : 0,
+      username: isSet(object.username) ? globalThis.String(object.username) : "",
     };
   },
 
-  toJSON(message: PlayerPositionData): unknown {
+  toJSON(message: PlayerData): unknown {
     const obj: any = {};
     if (message.id !== "") {
       obj.id = message.id;
@@ -434,14 +447,17 @@ export const PlayerPositionData: MessageFns<PlayerPositionData> = {
     if (message.rotationZ !== 0) {
       obj.rotationZ = message.rotationZ;
     }
+    if (message.username !== "") {
+      obj.username = message.username;
+    }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<PlayerPositionData>, I>>(base?: I): PlayerPositionData {
-    return PlayerPositionData.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<PlayerData>, I>>(base?: I): PlayerData {
+    return PlayerData.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<PlayerPositionData>, I>>(object: I): PlayerPositionData {
-    const message = createBasePlayerPositionData();
+  fromPartial<I extends Exact<DeepPartial<PlayerData>, I>>(object: I): PlayerData {
+    const message = createBasePlayerData();
     message.id = object.id ?? "";
     message.x = object.x ?? 0;
     message.y = object.y ?? 0;
@@ -449,29 +465,30 @@ export const PlayerPositionData: MessageFns<PlayerPositionData> = {
     message.rotationX = object.rotationX ?? 0;
     message.rotationY = object.rotationY ?? 0;
     message.rotationZ = object.rotationZ ?? 0;
+    message.username = object.username ?? "";
     return message;
   },
 };
 
-function createBasePlayerPositions(): PlayerPositions {
+function createBasePlayersData(): PlayersData {
   return { localPlayer: undefined, otherPlayers: [] };
 }
 
-export const PlayerPositions: MessageFns<PlayerPositions> = {
-  encode(message: PlayerPositions, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const PlayersData: MessageFns<PlayersData> = {
+  encode(message: PlayersData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.localPlayer !== undefined) {
-      PlayerPositionData.encode(message.localPlayer, writer.uint32(10).fork()).join();
+      PlayerData.encode(message.localPlayer, writer.uint32(10).fork()).join();
     }
     for (const v of message.otherPlayers) {
-      PlayerPositionData.encode(v!, writer.uint32(18).fork()).join();
+      PlayerData.encode(v!, writer.uint32(18).fork()).join();
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): PlayerPositions {
+  decode(input: BinaryReader | Uint8Array, length?: number): PlayersData {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBasePlayerPositions();
+    const message = createBasePlayersData();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -480,7 +497,7 @@ export const PlayerPositions: MessageFns<PlayerPositions> = {
             break;
           }
 
-          message.localPlayer = PlayerPositionData.decode(reader, reader.uint32());
+          message.localPlayer = PlayerData.decode(reader, reader.uint32());
           continue;
         }
         case 2: {
@@ -488,7 +505,7 @@ export const PlayerPositions: MessageFns<PlayerPositions> = {
             break;
           }
 
-          message.otherPlayers.push(PlayerPositionData.decode(reader, reader.uint32()));
+          message.otherPlayers.push(PlayerData.decode(reader, reader.uint32()));
           continue;
         }
       }
@@ -500,35 +517,35 @@ export const PlayerPositions: MessageFns<PlayerPositions> = {
     return message;
   },
 
-  fromJSON(object: any): PlayerPositions {
+  fromJSON(object: any): PlayersData {
     return {
-      localPlayer: isSet(object.localPlayer) ? PlayerPositionData.fromJSON(object.localPlayer) : undefined,
+      localPlayer: isSet(object.localPlayer) ? PlayerData.fromJSON(object.localPlayer) : undefined,
       otherPlayers: globalThis.Array.isArray(object?.otherPlayers)
-        ? object.otherPlayers.map((e: any) => PlayerPositionData.fromJSON(e))
+        ? object.otherPlayers.map((e: any) => PlayerData.fromJSON(e))
         : [],
     };
   },
 
-  toJSON(message: PlayerPositions): unknown {
+  toJSON(message: PlayersData): unknown {
     const obj: any = {};
     if (message.localPlayer !== undefined) {
-      obj.localPlayer = PlayerPositionData.toJSON(message.localPlayer);
+      obj.localPlayer = PlayerData.toJSON(message.localPlayer);
     }
     if (message.otherPlayers?.length) {
-      obj.otherPlayers = message.otherPlayers.map((e) => PlayerPositionData.toJSON(e));
+      obj.otherPlayers = message.otherPlayers.map((e) => PlayerData.toJSON(e));
     }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<PlayerPositions>, I>>(base?: I): PlayerPositions {
-    return PlayerPositions.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<PlayersData>, I>>(base?: I): PlayersData {
+    return PlayersData.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<PlayerPositions>, I>>(object: I): PlayerPositions {
-    const message = createBasePlayerPositions();
+  fromPartial<I extends Exact<DeepPartial<PlayersData>, I>>(object: I): PlayersData {
+    const message = createBasePlayersData();
     message.localPlayer = (object.localPlayer !== undefined && object.localPlayer !== null)
-      ? PlayerPositionData.fromPartial(object.localPlayer)
+      ? PlayerData.fromPartial(object.localPlayer)
       : undefined;
-    message.otherPlayers = object.otherPlayers?.map((e) => PlayerPositionData.fromPartial(e)) || [];
+    message.otherPlayers = object.otherPlayers?.map((e) => PlayerData.fromPartial(e)) || [];
     return message;
   },
 };
@@ -540,7 +557,7 @@ function createBasePlayerJoined(): PlayerJoined {
 export const PlayerJoined: MessageFns<PlayerJoined> = {
   encode(message: PlayerJoined, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.newPlayer !== undefined) {
-      PlayerPositionData.encode(message.newPlayer, writer.uint32(10).fork()).join();
+      PlayerData.encode(message.newPlayer, writer.uint32(10).fork()).join();
     }
     return writer;
   },
@@ -557,7 +574,7 @@ export const PlayerJoined: MessageFns<PlayerJoined> = {
             break;
           }
 
-          message.newPlayer = PlayerPositionData.decode(reader, reader.uint32());
+          message.newPlayer = PlayerData.decode(reader, reader.uint32());
           continue;
         }
       }
@@ -570,13 +587,13 @@ export const PlayerJoined: MessageFns<PlayerJoined> = {
   },
 
   fromJSON(object: any): PlayerJoined {
-    return { newPlayer: isSet(object.newPlayer) ? PlayerPositionData.fromJSON(object.newPlayer) : undefined };
+    return { newPlayer: isSet(object.newPlayer) ? PlayerData.fromJSON(object.newPlayer) : undefined };
   },
 
   toJSON(message: PlayerJoined): unknown {
     const obj: any = {};
     if (message.newPlayer !== undefined) {
-      obj.newPlayer = PlayerPositionData.toJSON(message.newPlayer);
+      obj.newPlayer = PlayerData.toJSON(message.newPlayer);
     }
     return obj;
   },
@@ -587,7 +604,7 @@ export const PlayerJoined: MessageFns<PlayerJoined> = {
   fromPartial<I extends Exact<DeepPartial<PlayerJoined>, I>>(object: I): PlayerJoined {
     const message = createBasePlayerJoined();
     message.newPlayer = (object.newPlayer !== undefined && object.newPlayer !== null)
-      ? PlayerPositionData.fromPartial(object.newPlayer)
+      ? PlayerData.fromPartial(object.newPlayer)
       : undefined;
     return message;
   },
