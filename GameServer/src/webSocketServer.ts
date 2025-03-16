@@ -25,6 +25,7 @@ interface PlayerState {
   rotation: { x: number; y: number; z: number };
   isInWorld: Boolean;
   connectedClient: ConnectedClient;
+  color?: { r: number; g: number; b: number; };
 }
 
 export const connectedClients = new Set<ConnectedClient>();

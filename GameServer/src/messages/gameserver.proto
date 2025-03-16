@@ -16,6 +16,7 @@ message PlayerData {
   float rotationY = 6;
   float rotationZ = 7;
   string username = 8;
+  Color color = 9;
 }
 
 message PlayersData {
@@ -97,4 +98,15 @@ message AddChatMessage {
   string id = 1;
   string username = 2;
   string message = 3;
+}
+
+message Color {
+  float r = 1;
+  float g = 2;
+  float b = 3;
+}
+
+message SetPlayerColor {
+  string id = 1;
+  Color color = 2;
 }

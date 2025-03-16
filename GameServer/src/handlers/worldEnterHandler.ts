@@ -16,7 +16,7 @@ const WorldEnterHandler: IHandler = {
     const initialPlayerState = {
       id: userId,
       username: client?.username || '',
-      position: { x: 133, y: 0, z: 124 },
+      position: { x: 133, y: 0, z: 120 + playerStates.size * 2 },
       rotation: { x: 0, y: 0, z: 0 },
       isInWorld: true,
       connectedClient: Array.from(connectedClients)
@@ -34,6 +34,7 @@ const WorldEnterHandler: IHandler = {
         rotationY: playerState.rotation.y,
         rotationZ: playerState.rotation.z,
         username: playerState.username,
+        color: playerState.color,
       }));
 
     playerStates.set(userId, initialPlayerState);

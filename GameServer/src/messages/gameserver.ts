@@ -161,6 +161,7 @@ export interface PlayerData {
   rotationY: number;
   rotationZ: number;
   username: string;
+  color?: Color | undefined;
 }
 
 export interface PlayersData {
@@ -220,6 +221,17 @@ export interface AddChatMessage {
   id: string;
   username: string;
   message: string;
+}
+
+export interface Color {
+  r: number;
+  g: number;
+  b: number;
+}
+
+export interface SetPlayerColor {
+  id: string;
+  color: Color | undefined;
 }
 
 function createBaseWrapper(): Wrapper {
@@ -299,7 +311,7 @@ export const Wrapper: MessageFns<Wrapper> = {
 };
 
 function createBasePlayerData(): PlayerData {
-  return { id: "", x: 0, y: 0, z: 0, rotationX: 0, rotationY: 0, rotationZ: 0, username: "" };
+  return { id: "", x: 0, y: 0, z: 0, rotationX: 0, rotationY: 0, rotationZ: 0, username: "", color: undefined };
 }
 
 export const PlayerData: MessageFns<PlayerData> = {
@@ -327,6 +339,9 @@ export const PlayerData: MessageFns<PlayerData> = {
     }
     if (message.username !== "") {
       writer.uint32(66).string(message.username);
+    }
+    if (message.color !== undefined) {
+      Color.encode(message.color, writer.uint32(74).fork()).join();
     }
     return writer;
   },
@@ -402,6 +417,14 @@ export const PlayerData: MessageFns<PlayerData> = {
           message.username = reader.string();
           continue;
         }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.color = Color.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -421,6 +444,7 @@ export const PlayerData: MessageFns<PlayerData> = {
       rotationY: isSet(object.rotationY) ? globalThis.Number(object.rotationY) : 0,
       rotationZ: isSet(object.rotationZ) ? globalThis.Number(object.rotationZ) : 0,
       username: isSet(object.username) ? globalThis.String(object.username) : "",
+      color: isSet(object.color) ? Color.fromJSON(object.color) : undefined,
     };
   },
 
@@ -450,6 +474,9 @@ export const PlayerData: MessageFns<PlayerData> = {
     if (message.username !== "") {
       obj.username = message.username;
     }
+    if (message.color !== undefined) {
+      obj.color = Color.toJSON(message.color);
+    }
     return obj;
   },
 
@@ -466,6 +493,7 @@ export const PlayerData: MessageFns<PlayerData> = {
     message.rotationY = object.rotationY ?? 0;
     message.rotationZ = object.rotationZ ?? 0;
     message.username = object.username ?? "";
+    message.color = (object.color !== undefined && object.color !== null) ? Color.fromPartial(object.color) : undefined;
     return message;
   },
 };
@@ -1362,6 +1390,174 @@ export const AddChatMessage: MessageFns<AddChatMessage> = {
     message.id = object.id ?? "";
     message.username = object.username ?? "";
     message.message = object.message ?? "";
+    return message;
+  },
+};
+
+function createBaseColor(): Color {
+  return { r: 0, g: 0, b: 0 };
+}
+
+export const Color: MessageFns<Color> = {
+  encode(message: Color, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.r !== 0) {
+      writer.uint32(13).float(message.r);
+    }
+    if (message.g !== 0) {
+      writer.uint32(21).float(message.g);
+    }
+    if (message.b !== 0) {
+      writer.uint32(29).float(message.b);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Color {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseColor();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 13) {
+            break;
+          }
+
+          message.r = reader.float();
+          continue;
+        }
+        case 2: {
+          if (tag !== 21) {
+            break;
+          }
+
+          message.g = reader.float();
+          continue;
+        }
+        case 3: {
+          if (tag !== 29) {
+            break;
+          }
+
+          message.b = reader.float();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Color {
+    return {
+      r: isSet(object.r) ? globalThis.Number(object.r) : 0,
+      g: isSet(object.g) ? globalThis.Number(object.g) : 0,
+      b: isSet(object.b) ? globalThis.Number(object.b) : 0,
+    };
+  },
+
+  toJSON(message: Color): unknown {
+    const obj: any = {};
+    if (message.r !== 0) {
+      obj.r = message.r;
+    }
+    if (message.g !== 0) {
+      obj.g = message.g;
+    }
+    if (message.b !== 0) {
+      obj.b = message.b;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Color>, I>>(base?: I): Color {
+    return Color.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Color>, I>>(object: I): Color {
+    const message = createBaseColor();
+    message.r = object.r ?? 0;
+    message.g = object.g ?? 0;
+    message.b = object.b ?? 0;
+    return message;
+  },
+};
+
+function createBaseSetPlayerColor(): SetPlayerColor {
+  return { id: "", color: undefined };
+}
+
+export const SetPlayerColor: MessageFns<SetPlayerColor> = {
+  encode(message: SetPlayerColor, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.color !== undefined) {
+      Color.encode(message.color, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SetPlayerColor {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSetPlayerColor();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.color = Color.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SetPlayerColor {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      color: isSet(object.color) ? Color.fromJSON(object.color) : undefined,
+    };
+  },
+
+  toJSON(message: SetPlayerColor): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.color !== undefined) {
+      obj.color = Color.toJSON(message.color);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<SetPlayerColor>, I>>(base?: I): SetPlayerColor {
+    return SetPlayerColor.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<SetPlayerColor>, I>>(object: I): SetPlayerColor {
+    const message = createBaseSetPlayerColor();
+    message.id = object.id ?? "";
+    message.color = (object.color !== undefined && object.color !== null) ? Color.fromPartial(object.color) : undefined;
     return message;
   },
 };
