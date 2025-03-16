@@ -40,9 +40,9 @@ export let wss: ExtendedWebSocketServer;
 
 // Load SSL certificate for WSS
 const sslOptions = {
-  key: fs.readFileSync("C:/Certs/server.mu.tsan.dev-key.pem"),
-  cert: fs.readFileSync("C:/Certs/server.mu.tsan.dev-crt.pem"),
-  ca: fs.readFileSync("C:/Certs/server.mu.tsan.dev-chain.pem")
+  key: fs.readFileSync("C:/Certs/die-mu.com/die-mu.com-key.pem"),
+  cert: fs.readFileSync("C:/Certs/die-mu.com/die-mu.com-crt.pem"),
+  ca: fs.readFileSync("C:/Certs/die-mu.com/die-mu.com-chain.pem")
 };
 
 export const initWebSocketServer = () => {
