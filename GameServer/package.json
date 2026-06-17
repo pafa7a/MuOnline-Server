@@ -19,8 +19,8 @@
   "description": "",
   "dependencies": {
     "ws": "^8.18.0",
-    "sqlite3": "^5.1.7",
-    "typeorm": "^0.3.20",
+    "sqlite3": "^6.0.1",
+    "typeorm": "^1.0.0",
     "reflect-metadata": "^0.2.1"
   },
   "devDependencies": {
